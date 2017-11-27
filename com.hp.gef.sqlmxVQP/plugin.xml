@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+        point="org.eclipse.ui.views">
+      <category
+            name="VQP category"
+            id="com.hp.gef.sqlmxVQP">
+      </category>
+      <view
+            allowMultiple="true"
+            category="com.hp.gef.sqlmxVQP"
+            class="com.hp.gef.sqlmxvqp.views.SampleView"
+            icon="icons/VQP icon small.png"
+            id="com.hp.gef.sqlmxvqp.views.SampleView"
+            name="Visual Query Display">
+      </view>
+      <view
+            allowMultiple="true"
+            category="com.hp.gef.sqlmxVQP"
+            class="com.hp.gef.sqlmxvqp.views.TreeView"
+            icon="icons/VQP icon small.png"
+            id="com.hp.gef.sqlmxvqp.views.TreeView"
+            name="Tree View"
+            restorable="true">
+      </view>
+      <view
+            class="com.hp.gef.sqlmxvqp.views.VisualQueryPlanView"
+            icon="icons/VQP icon small.png"
+            id="com.hp.gef.sqlmxvqp.views.VisualQueryPlanView"
+            name="VQP">
+      </view>
+      <view
+            category="com.hp.gef.sqlmxVQP"
+            class="org.eclipse.ui.navigator.CommonNavigator"
+            id="com.hp.gef.sqlmxVQP.ProjectExplorer"
+            name="VQP Project Explorer"
+            restorable="true">
+      </view>
+      <view
+            class="com.hp.gef.sqlmxvqp.views.RetrievedPlanView"
+            icon="icons/VQP icon small.png"
+            id="com.hp.gef.sqlmxVQP.retrievePlanView"
+            name="Retrieved VQP plan"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewer
+            viewerId="com.hp.gef.sqlmxVQP.ProjectExplorer">
+      </viewer>
+      <!--<viewerContentBinding viewerId="org.eclipse.ui.examples.navigator.view">
+         <includes>
+            <contentExtension pattern="org.eclipse.ui.navigator.resourceContent"/>
+            <contentExtension pattern="org.eclipse.ui.navigator.resources.filters.*"/> 
+            <contentExtension pattern="org.eclipse.ui.examples.navigator.filters.*"/> 
+         </includes>
+      </viewerContentBinding>
+      <viewerActionBinding viewerId="org.eclipse.ui.examples.navigator.view">
+         <includes>
+            <actionExtension pattern="org.eclipse.ui.navigator.resources.*"/>
+         </includes>
+      </viewerActionBinding> -->
+      <viewerContentBinding
+            viewerId="com.hp.gef.sqlmxVQP.ProjectExplorer">
+         <includes>
+            <contentExtension
+                  pattern="com.hp.gef.sqlmxVQP.VQPcontentExtension">
+            </contentExtension>
+            <contentExtension pattern="org.eclipse.ui.navigator.resourceContent"/>
+         </includes>
+      </viewerContentBinding>
+      <viewerActionBinding viewerId="org.eclipse.ui.examples.navigator.view">
+         <includes>
+            <actionExtension pattern="org.eclipse.ui.navigator.resources.*"/>
+         </includes>
+      </viewerActionBinding>
+   </extension>
+  <!-- <extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+      <navigatorContent
+            contentProvider="org.eclipse.ui.navigator.CommonNavigator"
+            id="com.hp.gef.sqlmxVQP.VQPcontentExtension"
+            labelProvider="org.eclipse.ui.navigator.CommonNavigator"
+            name="VQP extension">
+         <actionProvider
+               class="com.hp.gef.sqlmxvqp.actionprovider.OpenFileProvider"
+               id="openSerProvider">
+         </actionProvider>
+         <triggerPoints>
+            <and>
+               <instanceof
+                     value="org.eclipse.core.resources.IResource">
+               </instanceof>
+               <test
+                     property="org.eclipse.core.resources.extension"
+                     value="ser">
+               </test>
+            </and>
+         </triggerPoints>
+      </navigatorContent>
+   </extension>
+-->  
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="com.hp.gef.sqlmxvqp.views.SampleView"
+               ratio="0.75"
+               relationship="right"
+               relative="org.eclipse.ui.views.ProblemView"
+               visible="true">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+       point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
+      <propertyContributor contributorId="com.hp.gef.sqlmxvqp.views.SampleView">
+         <propertyCategory category="VQP"/>
+      </propertyContributor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
+      <propertyTabs contributorId="com.hp.gef.sqlmxvqp.views.SampleView">
+         <propertyTab
+               category="VQP"
+               id="NodeDetails"
+               label="Node Details"/>
+         <propertyTab
+               afterTab="NodeDetails"
+               category="VQP"
+               id="CostDetails"
+               label="Cost Details"/>
+      <propertyTab
+               afterTab="CostDetails"
+               category="VQP"
+               id="Description"
+               label="Description"/>
+      </propertyTabs>
+      
+   
+   </extension>
+      <extension
+         point="org.eclipse.ui.views.properties.tabbed.propertySections">
+      <propertySections contributorId="com.hp.gef.sqlmxvqp.views.SampleView">
+         <propertySection
+               class="com.hp.gef.sqlmxvqp.propertyproviders.NodeDetailsSection"
+               id="NodeDetailsSection"
+               tab="NodeDetails">
+            <input type="com.hp.gef.sqlmxvqp.model.Nodes"/>
+         </propertySection>
+         
+         <propertySection
+               class="com.hp.gef.sqlmxvqp.propertyproviders.DescriptionSection"
+               id="DescriptionSection"
+               tab="Description">
+            <input type="com.hp.gef.sqlmxvqp.model.Nodes"/>
+         </propertySection>
+          <propertySection
+             class="com.hp.gef.sqlmxvqp.propertyproviders.NewCostDetailsSection"
+               id="CostSection"
+               tab="CostDetails">
+            <input type="com.hp.gef.sqlmxvqp.model.Nodes"/>
+         </propertySection>
+      </propertySections>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu?after=window">
+         
+         <menu
+               id="com.hp.gef.sqlmxvqp.menu.VQPmenu"
+               label="Visual Query Planner">
+               <command
+               commandId="com.hp.gef.sqlmxVQP.connectToNonstop"
+               label="Connect to NonStop"
+               style="push">
+         </command>
+         <command
+               commandId="com.hp.gef.sqlmxVQP.command2"
+               label="Generate graphical plan"
+               style="push">
+         </command>
+         <command
+               commandId="com.hp.gef.sqlmxVQP.command3"
+               label="Open new VQP file..."
+               style="push">
+         </command>
+         </menu>
+         
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="com.hp.gef.sqlmxvqp.commandhandler.EnterCredentialsHandler"
+            id="com.hp.gef.sqlmxVQP.connectToNonstop"
+            name="Connect to NonStop">
+      </command>
+      <command
+            defaultHandler="com.hp.gef.sqlmxvqp.commandhandler.GenerateExplain"
+            id="com.hp.gef.sqlmxVQP.command2"
+            name="Generate graphical plan">
+      </command>
+      <command
+            defaultHandler="com.hp.gef.sqlmxvqp.commandhandler.OpenNewVQPFile"
+            id="com.hp.gef.sqlmxVQP.command3"
+            name="Open new VQP file...">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.hp.gef.sqlmxvqp.sqlmxeditor.SqlMxQueryEditor"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            default="false"
+            extensions="sqlmx"
+            icon="icons/VQP icon small.png"
+            id="com.hp.gef.sqlmxVQP.sqlmxeditor1"
+            name="SQL/MX Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            class="com.hp.gef.sqlmxvqp.wizards.SavePlanWizard"
+            icon="icons/VQP icon small.png"
+            id="com.hp.gef.sqlmxVQP.SavePlanWizard"
+            name="Save plan">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+      <commonFilter
+            id="com.hp.gef.sqlmxVQP.commonFilter1"
+            name="Hide non ser files">
+         <filterExpression>
+            <not>
+               <adapt
+                     type="org.eclipse.core.resources.IFile">
+                  <test
+                        property="org.eclipse.core.resources.extension"
+                        value="ser">
+                  </test>
+               </adapt>
+            </not>
+         </filterExpression>
+      </commonFilter>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.hp.gef.sqlmxvqp.perspectivefactory.VQPperspectiveFactory"
+            icon="icons/VQP icon small.png"
+            id="com.hp.gef.sqlmxVQP.VQPperspective"
+            name="Visual Query Planner">
+      </perspective>
+   </extension>
+
+</plugin>

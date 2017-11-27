@@ -1,0 +1,719 @@
+package objectRepositoryAndFunctionalLibrary;
+
+//import java.util.Iterator;
+import java.awt.AWTException;
+import java.awt.Robot;
+import java.awt.event.KeyEvent;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+//import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import com.relevantcodes.extentreports.ExtentReports;
+import com.relevantcodes.extentreports.LogStatus;
+
+public class RMCSSQLRegistrationPage {
+	
+	//Create a Web Driver object which will be used throughout this class
+	WebDriver driver;
+		
+	// SQL Server Page Header
+	@FindBy(xpath=".//*[@id='rmc-mssql-page']/nav/div[2]/h1")
+	WebElement stcServerPageHeader;
+	
+	//Add SQL Server Instance Button
+	@FindBy(xpath=".//*[@class='hp-button hp-secondary']")
+	WebElement btnAddSQLInstance;
+	
+	//SQL Server Instance Web Table
+	@FindBy(id="rmc-mssql-master-table")
+	WebElement tblInstanceTable;
+			
+	//Interface Server Drop Down Icon in Register SQL Server Page
+	@FindBy(xpath=".//*[@id='rmc-sqlserver-add-panels']/li[2]/div/div/div/div")
+	WebElement btnIntServerList;
+	
+	//Interface Server List in Register SQL Server Page
+	@FindBy(xpath=".//*[@id='rmc-sqlserver-add-panels']/li/div/div/div/ol/li/span")
+	List<WebElement> lstIntSrvDropDown;
+	
+	//Revolving Icon to Load the Instances after the Interface Server is selected
+	@FindBy(xpath=".//*[@id='rmc-sqlserver-add-panels']/li/label/div")
+	WebElement stcRevolvingIcon;
+	
+	//Text Area to add SQL Server
+	@FindBy(xpath=".//*[@id='rmcsql-add-server_textarea']")
+	WebElement txtAddSqlServer;
+	
+	//Use for Remote Copy Check Box
+	@FindBy(xpath=".//*[@id='rmcs-use-for-remotecopy']")
+	WebElement chkUseRemoteCopy;
+	
+	//Use for Force Registration Check Box
+	@FindBy(xpath=".//*[@id='rmcsql-add-forceregister-checkbox']")
+	WebElement chkForceRegistration;
+	
+	//Select Interface Server Button
+	@FindBy(xpath=".//*[@id='rmc-sql-server-select']")
+	WebElement btnSelectInterface;
+	
+	//Select Instance Dialog Header
+	@FindBy(xpath=".//*[@class='hp-button hp-secondary']")
+	WebElement stcSelectInstanceDialogHeader;
+	
+	//Edit box to search for Instances to be added 
+	@FindBy(xpath=".//*[@id='hp-body-div']/div[9]/div/div/div/form/div[1]/fieldset/ol/li/div/div/div[1]/input")
+	WebElement edtSelectInstanceSearch;
+	
+	//SQL Server Instance Table
+	@FindBy(xpath=".//*[@id='DataTables_Table_0']/tbody/tr/td[1]")
+	WebElement tblSQLServerInstance;
+	
+	//OK Button to register the selected Instances
+	@FindBy(id="rmc-sql-server-add")
+	WebElement btnSQLRegisterOK;
+	
+	//Cancel Button to cancel the SQL server Registration
+	@FindBy(xpath=".//*[@id='rmc-sql-server-add-cancel']")
+	WebElement btnSQLRegisterCancel;
+	
+	//Add Button to add the selected instances to the list for Registration
+	@FindBy(xpath=".//*[@id='hp-body-div']/div[9]/div/div/div/form/div[2]/div[3]/button[1]")
+	WebElement btnSelectInstance;
+	
+	//Add+ Button to add the selected instances to the list for Registration
+	@FindBy(xpath=".//*[@id='hp-body-div']/div[9]/div/div/div/form/div[2]/div[3]/button[2]")
+	WebElement btnSelectMoreInstance;
+	
+	//Cancel Button to Cancel Instance Selection
+	@FindBy(xpath=".//*[@id='hp-body-div']/div[9]/div/div/div/form/div[2]/div[3]/button[6]")
+	WebElement btnSelectInstancePageCancel;
+
+	//Actions Menu Dropdown Button
+	@FindBy(xpath=".//*[@id='rmc-mssql-actions']/label")
+	WebElement ActionsDropDownClick;
+
+	//Restore Option in Actions Menu
+	@FindBy(id="rmc-mssql-restore-action")
+	WebElement RestoreSelect;
+	
+	//Create Snapshot Option in Actions Menu	
+	@FindBy(id="rmc-mssql-create-snapshot-action")
+	public WebElement ClickCreate;
+	
+	//Switch View
+	@FindBy(xpath=".//*[@id='rmc-mssql-panel-selector']/div")
+	WebElement SwitchView;
+		
+	//Instances View
+	@FindBy(xpath=".//*[@id='rmc-mssql-panel-selector']/ol/li[1]/a")
+	WebElement InstancesView;
+
+    //Fetch Number of Rows from the SQL Master table
+	@FindBy(xpath=".//*[@id='rmc-mssql-master-table']/tbody/tr")
+	public List<WebElement> SQLrow;
+
+	//List of SQL Servers from SQL Server Master Table
+	@FindBy(xpath=".//*[@id='rmc-mssql-master-table']/tbody/tr/td[2]")
+	public List<WebElement> SQLServer;
+
+	//List of SQL Instances from SQL Server Master Table	
+	@FindBy(xpath=".//*[@id='rmc-mssql-master-table']/tbody/tr/td[1]")
+	public List<WebElement> SQLInstance;
+	
+	//Database selection from Database Table
+	@FindBy(xpath=".//*[@id='rmc-mssql-databases-table']/tbody/tr/td[1]")
+	public List<WebElement> SelDB;
+	
+	
+	//Objects to Validate the Activities Flyout Pane
+	@FindBy(xpath=".//*[@id='hp-flyout-activities']/li/div[1]/div/span[@class='hp-value']")
+	List<WebElement> ActivityList;
+
+	@FindBy(xpath=".//*[@id='hp-flyout-activities']/li")
+	List<WebElement> ActivityList1;
+	
+	//Flyout Button Object
+	@FindBy(xpath=".//*[@id='hp-activity-control']/div[1]")
+	WebElement flyOutButton;
+	
+    @FindBy(xpath=".//*[@id='rmc-mssql-actions']/label")
+    WebElement ActionButton;
+    
+    //Policy configuration button in actions dropdown
+    @FindBy(xpath=".//*[@id='rmc-mssql-policy-action']")
+    WebElement btnPolicy;
+    
+  //Web element for logout
+  		@FindBy(xpath=".//*[@id='hp-session-logout']")
+  		WebElement btnSessionLogout;
+  	//Web element for session control
+  			@FindBy(xpath=".//*[@id='hp-session-control']")
+  			WebElement btnSessionControl;
+	
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   Function Description: Main Constructor to Initialize the Page Factory Elements
+   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+	
+	public RMCSSQLRegistrationPage(WebDriver driver)
+	{
+		this.driver = driver;
+		PageFactory.initElements(driver, this);
+	}
+	
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   Function Description: Method to validate SQL Server landing Page validation.
+   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+	
+	public boolean SQLPageLandingValidation(ExtentReports extent)
+	{
+		//Initialize the function variable 
+		boolean blnFunctionStatus=true;
+		
+		//Checking whether the page header is displayed as expected
+		if(stcServerPageHeader.isDisplayed())
+		{
+			//Validate Add SQL Instance button and click
+			if(btnAddSQLInstance.isEnabled()){
+				btnAddSQLInstance.click();
+			}
+			else{
+				extent.log(LogStatus.FAIL, "+ SQL server Button Validation","+ SQL server Button not found/not enabled.");
+				blnFunctionStatus=false;
+			}
+		}
+		
+		//return the function status
+		return blnFunctionStatus; 
+	}
+	
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+   Function Description: Method to select the interface server 
+   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/	
+
+	public boolean selectInterfaceServer(String strBackupServer, ExtentReports extent) throws InterruptedException
+	{
+		//Initialize the function variables
+		boolean blnFunctionStatus=true;
+		//Thread.sleep(5000);
+		
+		//waiting for the Interface Server List to appear
+		waitForAnElement(driver,btnIntServerList);
+		
+		//Clicking on the interface Server Drop down Icon 
+		btnIntServerList.click();
+		
+		//Running a loop to select the expected Interface Server
+		for(WebElement item:lstIntSrvDropDown)
+		{
+			if(item.getText().equalsIgnoreCase(strBackupServer))
+			{
+				//Clicking on the Interface Server if it is found in the list
+				item.click();
+				
+				//Fetching the Current status of the Revolving Icon to see If SQL instances are loaded for selection
+				String strIconStatus = stcRevolvingIcon.getAttribute("style").substring(9).trim();
+						
+				//Running a loop until all the SQL Instance in the network is loaded for the selected Interface Server				
+				while(!strIconStatus.equalsIgnoreCase("none;"))
+				 {
+				   strIconStatus = stcRevolvingIcon.getAttribute("style").substring(9).trim();
+				   waitForAnElement(driver,btnIntServerList);
+				 }
+			}
+			else
+			{
+				extent.log(LogStatus.FAIL, "Interface server selection","Expected Interface server does not exist.");
+				blnFunctionStatus=false;
+			}
+		}
+		
+	  //Returning the validation status
+      return blnFunctionStatus;				
+	}
+
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   Function Description: Method to Click on the select instance button  
+   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+
+   public void selectInstanceButtonClick() throws InterruptedException
+	 {
+		//Clicking on the Select Instances Button to select Instances
+	   	//Thread.sleep(5000);
+	   	waitForAnElement(driver,btnSelectInterface);
+		btnSelectInterface.click();
+	 }
+
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   Function Description: Method to select instance for registration 
+   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+   
+   public boolean selectInstancesToRegister(String strSQLServer, String strInstance) throws InterruptedException
+   {
+	   
+	   			Boolean blnInstPresence=false;
+				
+				//Waiting for the SQL server Instance Window to appear
+				waitForAnElement(driver,stcSelectInstanceDialogHeader);
+				
+				//String strSQLServer="WINDOWS2K8EE";
+				System.out.println(strSQLServer);
+				//String strInstance="WIN2K8STDINST;WIN2K8INST2";
+				//String strInstance="WIN2K8STDINST";
+				String[] arrInstance;
+				if (strInstance.contains(";")){
+					arrInstance=strInstance.split(";");
+				}
+				else{
+					arrInstance= new String[1];
+					arrInstance[0]=strInstance;
+				}
+				
+				edtSelectInstanceSearch.sendKeys(strSQLServer);
+				
+				Robot robot=null;
+				try {
+					robot = new Robot();
+				} catch (AWTException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
+				Thread.sleep(5000);
+			
+				List<WebElement> SQLServers=driver.findElements(By.xpath(".//*[@id='DataTables_Table_0']/tbody/tr/td[1]"));
+				
+				
+				blnInstPresence=false;
+				
+				//robot.keyPress(KeyEvent.VK_CONTROL);					
+				for(String Instance:arrInstance)
+				{
+					int intTblRow=1;
+					for(WebElement SQLServer:SQLServers)
+					{
+						System.out.println("Table Row: "+intTblRow+" SQL Server Name: "+SQLServer.getText());
+						if (SQLServer.getText().equalsIgnoreCase(strSQLServer)){
+							WebElement SQLInstance=driver.findElement(By.xpath(".//*[@id='DataTables_Table_0']/tbody/tr["+intTblRow+"]/td[2]"));
+							System.out.println("Table Row: "+intTblRow+" SQL Instance Name: "+SQLInstance.getText());
+							System.out.println("Instance to Search : "+Instance);
+							if (SQLInstance.getText().equalsIgnoreCase(Instance)){
+								SQLInstance.click();
+								blnInstPresence=true;
+								robot.keyPress(KeyEvent.VK_CONTROL);
+							}
+						}
+						intTblRow++;
+					}
+
+				}
+				robot.keyRelease(KeyEvent.VK_CONTROL);
+				
+				return(blnInstPresence);
+	}
+
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+   Function Description: Method to click on Add instance button and OK Button to Select the Instances 
+   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/   
+ public boolean clickingOnAddInstanceButton(boolean blnInstPresence, String strUseForRC,String strForceReg, ExtentReports extent){
+	 
+	 boolean blnFunctionStatus=true;
+	 
+     //Clicking on Add Button to select the SQL server instance for Registration
+		if (blnInstPresence)
+		{
+			//Waiting for OK button to Appear and Click on it
+			waitForAnElement(driver,btnSelectInstance);
+			
+			//Clicking on Add Button to 
+			btnSelectInstance.click();
+			
+			//Waiting for OK button to Appear and Click on it
+			waitForAnElement(driver,chkUseRemoteCopy);
+			
+			//Selecting use for Remote Copy 
+			boolean blnchkstatus=selectaCheckBox(chkUseRemoteCopy, strUseForRC,"Use for Remote Copy", extent);
+			if(!blnchkstatus){
+				blnFunctionStatus=false;				
+			}
+
+			//Selecting Force Registration
+			boolean blnchkstatus1=selectaCheckBox(chkForceRegistration, strForceReg,"Force Registration", extent);
+			if(!blnchkstatus1){
+				blnFunctionStatus=false;				
+			}
+
+			//Clicking on OK button to complete SQL server registration
+			btnSQLRegisterOK.click();
+	   }
+		else{
+			extent.log(LogStatus.FAIL, "SQL Instance Selection","Specified SQL Server instance is not available for selection.");
+			clickingOnCancelButton(blnInstPresence,extent);
+		}
+	
+	//Return the function status 
+	return(blnFunctionStatus);
+ }
+ 
+ /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+ Function Description: Method to check Use for remote copy and Force Registration option based on user input 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+ 
+ public boolean selectaCheckBox(WebElement chkSelObj, String strSelectionValue,String strChkBoxDesc, ExtentReports extent){
+	 
+	 	boolean blnFunctionStatus=true;
+	 
+		//Selecting Use for Remote Copy Option if Force Registration is choosed by the user
+	 	strSelectionValue=strSelectionValue.trim();
+		if(strSelectionValue.equalsIgnoreCase("y") || strSelectionValue.equalsIgnoreCase("yes")){
+
+		//Clicking on use for remote copy check box 
+		chkSelObj.click();
+			
+		//Verifying whether it is selected after the user click
+		if(!chkSelObj.isSelected()){
+			extent.log(LogStatus.FAIL, "Selecting "+strSelectionValue+" Check box",strSelectionValue+" check box is not selected even after script clicked on it.");
+			blnFunctionStatus=false;
+		 }
+		else{
+			//Verifying and reporting error if this field is selected by default
+			if(chkSelObj.isSelected()){
+				extent.log(LogStatus.FAIL, "Selecting "+strSelectionValue+" Check box",strSelectionValue+" check box is selected by default.");
+				blnFunctionStatus=false;
+			 }
+		 }
+		}
+		
+	return(blnFunctionStatus);
+ }
+ 
+ /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+ Function Description: Method to click on Cancel button to cancel sql server registration
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+ 
+ public void clickingOnCancelButton(boolean blnInstPresence, ExtentReports extent){
+	 
+		 btnSelectInstancePageCancel.click();
+		
+		//Thread.sleep(2000);
+		//Waiting for OK button to Appear and Click on it
+		 waitForAnElement(driver,chkUseRemoteCopy);
+		
+		 btnSQLRegisterCancel.click();
+ }
+
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   Function Description: Method to validate snapshot restore Page Landing
+   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+	
+	public void SnapRestorePageLand() throws InterruptedException
+	{
+		ActionsDropDownClick.click();
+		Thread.sleep(1000);
+		RestoreSelect.click();
+		Thread.sleep(2000);		
+		
+	}
+	
+	public RMCSSnapRestorePage rmcsSnapRestorePage() throws InterruptedException
+	{
+		SnapRestorePageLand();
+		return PageFactory.initElements(driver,RMCSSnapRestorePage.class);
+		
+	}
+
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   Function Description: Method to validate snapshot restore Page Landing
+   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+	
+	public void CreatePageLand() throws InterruptedException
+	{
+		ActionsDropDownClick.click();
+		Thread.sleep(1000);
+		ClickCreate.click();
+		Thread.sleep(2000);
+	}
+	
+	public RMCSCreateSnapshot rmcsCreateSnapPage() throws InterruptedException
+	{
+		CreatePageLand();
+		return PageFactory.initElements(driver,RMCSCreateSnapshot.class);
+	}
+	
+	/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	   Function Description: Method to land into policy configuration Page
+	   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	 * @throws InterruptedException **/	
+	public void PolicyPageLand() throws InterruptedException
+	{
+		  ActionButton.click();
+		  Thread.sleep(2000);
+          btnPolicy.click();
+          Thread.sleep(3000);
+	}
+	
+	public RMCSPolicyConfig PolicyConfigPageLanding() throws InterruptedException
+    {
+           
+         PolicyPageLand();
+         return PageFactory.initElements(driver, RMCSPolicyConfig.class);
+           
+        
+    }
+
+	/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	   Function Description: Method to select Instance
+	   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+	
+	public void selectInstance(String instanceName, String dbName, String ssTimeStamp,  boolean isInstance) throws InterruptedException
+	{
+//		WebDriverWait wait=new WebDriverWait(driver, 60);
+		Thread.sleep(5000);
+		List<WebElement> instanceNames=driver.findElements(By.className("sqlInstance-name"));
+//		WebElement InstanceName;
+		for(WebElement temp: instanceNames)
+		{
+			if(temp.getText().equalsIgnoreCase(instanceName))
+				{
+				temp.click();
+				break;
+				}
+		}
+			
+   // Thread.sleep(3000);
+	if(isInstance)
+	{
+		SwitchView.click();
+		InstancesView.click();
+		Thread.sleep(3000);
+	}
+	Thread.sleep(3000);
+	if(dbName!=null)
+	{
+//		System.out.println(".//*[@id='"+dbName+"']/td[1]");
+		driver.findElement(By.xpath(".//*[@id='"+dbName+"']/td[1]")).click();
+		Thread.sleep(3000);
+	}
+	  
+		if(ssTimeStamp==null )
+			return;
+		driver.findElement(By.xpath(".//*[@id='"+ ssTimeStamp+ "']/td[2]")).click();
+		Thread.sleep(3000);
+
+	}
+	
+	/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	   Function Description: Method to select Backup for Restore
+	   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/	
+	
+	public void selectProtect(String instanceName, String dbName, String ssTimeStamp,  boolean isInstance) throws InterruptedException
+	{
+//		WebDriverWait wait=new WebDriverWait(driver, 60);
+		Thread.sleep(5000);
+		List<WebElement> instanceNames=driver.findElements(By.className("sqlInstance-name"));
+//		WebElement InstanceName;
+		for(WebElement temp: instanceNames)
+		{
+			if(temp.getText().equalsIgnoreCase(instanceName))
+				{
+				temp.click();
+				break;
+				}
+		}
+
+	if(isInstance)
+	{
+		SwitchView.click();
+		InstancesView.click();
+		Thread.sleep(3000);
+		List <WebElement> protectNames=driver.findElements(By.xpath(".//*[@id='mssql-instance-level-express-protect-table']/tbody/tr/td[3]"));
+		for(WebElement InstProtect: protectNames)
+		{
+			if(InstProtect.getText().equals(ssTimeStamp))
+			{
+				InstProtect.click();
+			}
+		}
+	}
+	
+	//Thread.sleep(3000);
+//		System.out.println(".//*[@id='"+dbName+"']/td[1]");
+	else
+	{
+		driver.findElement(By.xpath(".//*[@id='"+dbName+"']/td[1]")).click();
+	List <WebElement> DBprotectNames=driver.findElements(By.xpath(".//*[@id='mssql-database-level-express-protect-table']/tbody/tr/td[3]"));
+	for(WebElement DBProtect: DBprotectNames)
+	{
+		if(DBProtect.getText().equals(ssTimeStamp))
+		{
+			DBProtect.click();
+		}
+	}
+   }	
+ }
+
+// Modules from create snapshot
+	
+	public void selSQL(String SQlSrv, String Inst) throws InterruptedException
+	{
+		for (WebElement SQL1 : SQLrow)
+		{
+			Thread.sleep(3000);
+			System.out.println(SQL1.getText()); 
+			String test=SQL1.getText().toLowerCase().trim();
+			if (test.contains(SQlSrv.toLowerCase()) && test.contains(Inst.toLowerCase()))
+			{
+				System.out.println("found");
+				SQL1.click();
+				//wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-databases-table']/tbody/tr/td[4][contains(text(),translate('" + Inst + "','abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ'))]")));
+			//	WebDriverWait wait = new WebDriverWait(driver,90);
+			//	wait.until(ExpectedConditions.visibilityOfAllElements(SelDB));
+				System.out.println("Selected SQL");
+				break;
+			}
+		}
+	}
+
+	public void selDBName(String db_Name) throws InterruptedException
+	{
+		WebDriverWait wait = new WebDriverWait(driver,90);
+		wait.until(ExpectedConditions.visibilityOfAllElements(SelDB));
+		System.out.println("Inside SelectDB");
+		for (WebElement db : SelDB)
+		{
+			if (db_Name.equalsIgnoreCase(db.getText()))
+			{
+					System.out.println(db.getText());
+					System.out.println("found Database");
+					db.click();
+					System.out.println("Selected Database");
+					break;
+			}
+		}
+	}
+	
+	public void SelectSQLInstance(String SQlSrv, String Inst) throws InterruptedException
+	{
+		selSQL(SQlSrv, Inst);
+		Thread.sleep(3000);
+		SwitchView.click();
+		InstancesView.click();
+		Thread.sleep(3000);
+//		//wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-databases-table']/tbody/tr/td[4][contains(text(),translate('" + Inst + "','abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ'))]")));
+//		wait.until(ExpectedConditions.visibilityOfAllElements(SelDB));
+//		wait.until(ExpectedConditions.visibilityOfAllElements(InstSnaps));
+	}
+	
+	public void SelectSQLInstanceDatabase(String SQlSrv, String Inst, String DB) throws InterruptedException
+	{
+		selSQL(SQlSrv, Inst);
+		//Thread.sleep(3000);
+		//SwitchView.click();
+		//SelectDatabasesView.click();
+		Thread.sleep(3000);
+		//wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-databases-table']/tbody/tr/td[4][contains(text(),translate('" + Inst + "','abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ'))]")));
+//		wait.until(ExpectedConditions.visibilityOfAllElements(SelDB));
+		selDBName(DB);
+		System.out.println("Selected Database");
+		Thread.sleep(3000);
+//		PageFactory.initElements(driver, this);
+//		wait.until(ExpectedConditions.visibilityOfAllElements(DBSnaps));
+		
+	}
+	
+	public String getJobId() throws InterruptedException 
+	{
+		
+		//Thread.sleep(5000);
+		flyOutButton.click();
+		
+		  	String jobId = null;
+			int itr=0;
+			for (WebElement Act : ActivityList)
+			{
+				String status = Act.getAttribute("innerHTML");
+
+				
+				if (status.equalsIgnoreCase("changing"))
+				{
+//					Status =Act;
+					String datauri = ActivityList1.get(itr).getAttribute("data-uri");
+					String getTaskID[] = datauri.split("/");
+					jobId = getTaskID[getTaskID.length - 1].toString();
+//					System.out.println(Status.getText());
+					break;
+				}
+				itr = itr + 1;
+			}
+			return jobId;
+
+}
+	
+	public void checkTaskComplete() throws InterruptedException
+	{
+
+		WebDriverWait wait1= new WebDriverWait(driver, 3600);
+		wait1.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".hp-status.hp-status-changing")));
+		flyOutButton.click();
+		return;	
+	}
+
+ /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+ Function Description: Method to wait for an element to be visible for any action 
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+ 
+private static void waitForAnElement(WebDriver driver, WebElement wbeElementToFind)
+{
+	  Wait<WebDriver> wait;
+
+	  //Wait until the object is visible
+		wait = new FluentWait<WebDriver>(driver)
+			   //Wait for the condition
+			   .withTimeout(30, TimeUnit.SECONDS) 
+			   // which to check for the condition with interval of 5 seconds. 
+			   .pollingEvery(5, TimeUnit.SECONDS) 
+			   //Which will ignore the NoSuchElementException
+			   .ignoring(NoSuchElementException.class);
+		wait.until(ExpectedConditions.visibilityOf(wbeElementToFind));
+	
+}
+
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+Function Description: Method to wait for an element to be visible for any action 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++**/
+
+private static boolean isAttributePresent(WebElement WbeObject, String strAttribute) {
+    Boolean result = false;
+    try {
+        String value = WbeObject.getAttribute(strAttribute);
+        if (value != null){
+            result = true;
+        }
+    } catch (Exception e) {}
+
+    return result;
+}
+
+//Method to log out of RMC appliance
+	public void logOut() throws InterruptedException
+	{
+		if(!btnSessionLogout.isDisplayed())
+		{
+			btnSessionControl.click();
+		}
+		btnSessionLogout.click();
+		Thread.sleep(5000);
+	}
+
+}

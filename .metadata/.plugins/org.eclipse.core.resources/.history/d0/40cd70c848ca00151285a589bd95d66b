@@ -1,0 +1,1299 @@
+package rmcstestsuite;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+import com.relevantcodes.extentreports.ExtentReports;
+import com.relevantcodes.extentreports.LogStatus;
+
+import objectRepositoryAndFunctionalLibrary.ActivityPage;
+import objectRepositoryAndFunctionalLibrary.RMCSPolicyConfig;
+import objectRepositoryAndFunctionalLibrary.RMCSDashboard;
+import objectRepositoryAndFunctionalLibrary.RMCSLoginPage;
+import objectRepositoryAndFunctionalLibrary.RMCSSQLRegistrationPage;
+import objectRepositoryAndFunctionalLibrary.flyoutActivity;
+import utils.readBrowserType;
+import utils.readFromINI;
+import utils.rmcsDataProvider;
+import utils.rmcsLogger;
+
+public class PolicyConfig {
+	
+
+	static WebDriver driver;
+	static RMCSLoginPage rmcs;
+	static RMCSDashboard rmcsdshbd;
+	static ExtentReports extent;
+	static Logger debugLog;
+	static readFromINI rd;
+	static RMCSSQLRegistrationPage rmcssql;
+	static RMCSPolicyConfig policyConfig;
+	static String maxDbSnaps="2";
+	static String maxInstanceSnaps="2";
+	
+	@BeforeTest
+	public void initializeTest()
+	{
+		
+		
+		//Creating an object to read from config.ini file
+				rd=new readFromINI();
+						
+				//Initializing the browser and launching the application under test.
+				driver = readBrowserType.chooseBrowserDriver(driver);
+				driver.manage().timeouts().implicitlyWait(5,TimeUnit.SECONDS);
+				driver.get(/*"10.11.12.142");*/rd.readFromIniFile("APPDETAILS","URL"));
+				driver.manage().window().maximize();
+				
+				//Initializing the objects for logging and reporting.
+				rmcsLogger rmcslog = new rmcsLogger();
+				extent=rmcslog.rmcsInitializeReports(rd.readFromIniFile("POLICYREPORT","POLICYREPORTLOCATION"),rd.readFromIniFile("POLICYREPORT","POLICYREPORTTILTE"),rd.readFromIniFile("POLICYREPORT","POLICYREPORTHEAD"));
+				debugLog=rmcslog.rmcsInitializeLogs();
+	}
+		
+	//rd.readFromIniFile("POLICYREPORT","POLICYREPORTTILTE"),rd.readFromIniFile("POLICYREPORT","POLICYREPORTHEAD"));
+	
+	@Test(priority=1, dataProvider="getData",dataProviderClass=rmcsDataProvider.class)
+	public static void TC_01_Numeric_Policy_maxDB_Snapshots(String strTC_ID, String strExecute, String strUsername, String strPassword,String expectedValue, String jobName, String instanceName,String DBName ) throws InterruptedException, IOException
+	{
+		extent.startTest(strTC_ID, "Rescan Dialog check");
+		
+		if(strExecute.equalsIgnoreCase("Y")){
+			System.out.println("\n\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			   System.out.println("Running test"+strTC_ID+" \n\n\n\n");
+			
+			WebDriverWait wait2=new WebDriverWait(driver, 120);
+			
+//			wait2.until(ExpectedConditions.visibilityOf(driver.findElement(By.xpath(".//*[@id='hp-login-user']"))));
+			
+			RMCSLoginPage rmcs= new RMCSLoginPage(driver);
+			
+			RMCSDashboard rmcsdshbd= rmcs.rmcsvalidlogin(strUsername, strPassword);
+		boolean login=rmcsdshbd.LoginValidation(strUsername, extent);	
+		if(login)
+		{
+			debugLog.info("Logged successfully into Dashboard page");
+			rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+		  	rmcssql.SQLPageLandingValidation(extent);
+		  	WebDriverWait wait= new WebDriverWait(driver, 30);
+		  	wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-actions']/label	")));
+		  	System.out.println("Wait over");
+		  	Thread.sleep(3000);
+		  	rmcssql.selectInstance(instanceName, DBName	,null, false);
+		  	Thread.sleep(2000);
+		  	policyConfig=rmcssql.PolicyConfigPageLanding();
+		  	
+	//		  	WebElement actionButton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	"));
+//		  	actionButton.click();
+//		  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-policy-action']")).click();
+//		  	wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='hp-change-page-container']/section/header/h1/span[1]")));
+		  	Thread.sleep(3000);
+//		   	if(driver.findElement(By.xpath(".//*[@id='rmcs-policy-level']")).getText().equalsIgnoreCase(instanceName))
+//		  	{
+//		  		System.out.println("\nInstance name validation success");
+//		  		
+//		  	}
+//		  	else
+//		  		System.out.println("\nInstance name validation failed");
+		  	
+		  	if(policyConfig.policyLandingPageValidation(instanceName,extent))
+		  	{
+		  		System.out.println("\nInstance name validation success");
+		  		
+		  	}
+		  	else
+		  		System.out.println("\nInstance name validation failed");
+//		  	policyConfig.setExpirationPolicy("3",	 null, extent);
+		  	policyConfig.setNumericPolicyFields(null, maxDbSnaps, null, null, null, false, false);
+//		  	WebElement maxInstanceSS= driver.findElement(By.xpath(".//*[@id='rmcs-max-instance-snaps']"));
+//		  	//Maximum Instance level Snapshots field
+//		  	maxInstanceSS.clear();
+//		  	maxInstanceSS.sendKeys("2");
+//		  	//Maximum DB level Snapshots field
+//		  	WebElement maxDbSS= driver.findElement(By.xpath(".//*[@id='rmcs-max-db-snaps']"));
+//		  	maxDbSS.clear();
+//		  	maxDbSS.sendKeys("3");
+//		  	//OK button on policy config dialog
+//		  	WebElement policyConfigOK= driver.findElement(By.xpath(".//*[@id='rmcs-policy-ok']"));
+//		  	policyConfigOK.click();
+		  	wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Policy update has started"));
+//		  	Thread.sleep(10000);
+		  	flyoutActivity fly = new flyoutActivity(driver);
+		  	Thread.sleep(2000);
+		  	
+		  	fly.openFlyOutPage();
+		  	Thread.sleep(2000);
+		  	fly.checkTaskComplete();
+		  	
+		  	ActivityPage activityPage= new ActivityPage(driver);
+		  	activityPage.ActivityPageLand();
+		  	boolean flag=true;
+		  	if(activityPage.checkTaskCompletion(activityPage.getJobIdbyJobName(jobName)).equalsIgnoreCase("completed"))
+		  	{
+		  		ArrayList<String> snaps = new ArrayList<String>();
+		  		System.out.println("Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO	, "Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO, "Creating "+maxDbSnaps+" snapshots according to policy and checking");
+		  		System.out.println("Creating "+maxDbSnaps+" snapshots according to policy and checking");
+			  	for(int i=0;i<Integer.valueOf(maxDbSnaps);i++)
+			  		{
+			  		Thread.sleep(3000);
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, DBName,null	, false);
+				  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+				  	Thread.sleep(2000);
+				  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+			  		createSSbutton.click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+			  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+//			  		ActivityPage ac= new ActivityPage(driver);
+//			  		System.out.println("\n\n\tShort description is : "+ac.shortDescription(jobId));
+			  		activityPage.ActivityPageLand();
+			  		
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("completed"))
+			  		{
+			  			extent.log(LogStatus.INFO, "Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+			  			System.out.println("Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));	
+//			  			String x="Snapshot [012716121000] created successfully for database [CHOINST2DB2] of instance [CHOINST2]";
+			  			String [] x1= activityPage.getShortDescription(jobId).split("\\[");
+			  			String[] x2= x1[1].split("\\]");
+			  			System.out.println(x2[0]);
+//			  			String [] temp1=activityPage.getShortDescription(jobId).split("\\[");
+			  			snaps.add(i, x2[0]);
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  			flag=false;
+			  			break;
+			  			}
+			  			
+			  		}
+			  	if(flag)
+			  	{
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, DBName,null	, false);
+				  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+				  	Thread.sleep(2000);
+				  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+			  		createSSbutton.click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+			  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+//			  		ActivityPage ac= new ActivityPage(driver);
+//			  		System.out.println("\n\n\tShort description is : "+ac.shortDescription(jobId));
+			  		activityPage.ActivityPageLand();
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("error"))
+			  		{
+			  			System.out.println("Success : "+ activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.INFO, activityPage.getShortDescription(jobId));
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  		}
+			  			
+			  	}
+			  	for(int i=0;i<snaps.size();i++)
+			  	{	
+			  		rmcsdshbd.RMCSSQLApplicationClick();
+			  		rmcssql.SQLPageLandingValidation(extent);
+			  		rmcssql.selectInstance(instanceName, DBName, snaps.get(i), false);
+			  		rmcssql.ActionsDropDown();
+			  		driver.findElement(By.xpath(".//*[@id='rmc-mssql-remove-action']")).click();
+			  		driver.findElement(By.xpath(".//*[@id='hp-alert-assign-form']/footer/div/button[1]")).click();
+			  		System.out.println("Deleting snapshot : " +snaps.get(i));
+			  		Thread.sleep(1000);
+			  		fly.checkTaskComplete();
+			  		Thread.sleep(3000);
+			  		
+			  	}
+		  	}
+		  	
+		}
+		rmcssql.logOut();
+		System.out.println(" \n\n\n\n"+"Exiting test"+strTC_ID);
+		System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n\n");
+		   
+
+	}
+		
+	}
+	
+	@Test(priority=2, dataProvider="getData",dataProviderClass=rmcsDataProvider.class)
+	public static void TC_02_Numeric_Policy_maxInstance_Snapshots(String strTC_ID, String strExecute, String strUsername, String strPassword,String expectedValue, String jobName, String instanceName,String DBName ) throws InterruptedException, IOException
+	{
+		extent.startTest(strTC_ID, "Rescan Dialog check");
+		
+		if(strExecute.equalsIgnoreCase("Y")){
+			System.out.println("\n\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			   System.out.println("Running test"+strTC_ID+" \n\n\n\n");
+			
+			RMCSLoginPage rmcs= new RMCSLoginPage(driver);
+			RMCSDashboard rmcsdshbd= rmcs.rmcsvalidlogin(strUsername, strPassword);
+				
+		boolean login=rmcsdshbd.LoginValidation(strUsername, extent);	
+		if(login)
+		{
+			debugLog.info("Logged successfully into Dashboard page");
+			rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+		  	rmcssql.SQLPageLandingValidation(extent);
+		  	WebDriverWait wait= new WebDriverWait(driver, 30);
+		  	wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-actions']/label	")));
+		  	System.out.println("Wait over");
+		  	Thread.sleep(3000);
+		  	rmcssql.selectInstance(instanceName, null,null, true);
+		  	Thread.sleep(2000);
+		  	policyConfig=rmcssql.PolicyConfigPageLanding();
+	
+		  	Thread.sleep(3000);
+		   	
+		  	
+		  	if(policyConfig.policyLandingPageValidation(instanceName,extent))
+		  	{
+		  		System.out.println("\nInstance name validation success");
+		  		
+		  	}
+		  	else
+		  		System.out.println("\nInstance name validation failed");
+		  
+		  	policyConfig.setNumericPolicyFields(maxInstanceSnaps, null, null, null, null,false,false);
+		  	
+		  	wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Policy update has started"));
+
+		  	flyoutActivity fly= new flyoutActivity(driver);
+		  	fly.openFlyOutPage();
+		  	Thread.sleep(2000);
+		  	fly.checkTaskComplete();
+		  	
+		  	ActivityPage activityPage= new ActivityPage(driver);
+		  	activityPage.ActivityPageLand();
+		  	boolean flag=true;
+		  	if(activityPage.checkTaskCompletion(activityPage.getJobIdbyJobName(jobName)).equalsIgnoreCase("completed"))
+		  	{
+		  		ArrayList<String> snaps = new ArrayList<String>();
+		  		System.out.println("Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO	, "Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO, "Creating "+maxDbSnaps+" snapshots according to policy and checking");
+			  	for(int i=0;i<Integer.valueOf(maxInstanceSnaps);i++)
+			  		{
+			  		Thread.sleep(3000);
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, null,null	, true);
+				  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+				  	Thread.sleep(2000);
+				  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+			  		createSSbutton.click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+			  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+
+			  		activityPage.ActivityPageLand();
+			  		
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("completed"))
+			  		{
+			  			extent.log(LogStatus.INFO, "Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+			  			System.out.println("Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+			  			String [] x1= activityPage.getShortDescription(jobId).split("\\[");
+			  			String[] x2= x1[1].split("\\]");
+			  			System.out.println(x2[0]);
+			  			
+			  			snaps.add(i, x2[0]);
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  			flag=false;
+			  			break;
+			  			}
+			  			
+			  		}
+			  	if(flag)
+			  	{
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, null,null	, true);
+				  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+				  	Thread.sleep(2000);
+				  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+			  		createSSbutton.click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+			  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+
+			  		activityPage.ActivityPageLand();
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("error"))
+			  		{
+			  			System.out.println("Success : "+ activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.INFO, activityPage.getShortDescription(jobId));
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  		}
+			  			
+			  	}
+			  	
+			  	for(int i=0;i<snaps.size();i++)
+			  	{	
+			  		rmcsdshbd.RMCSSQLApplicationClick();
+			  		rmcssql.SQLPageLandingValidation(extent);
+			  		rmcssql.selectInstance(instanceName, null, snaps.get(i), true);
+			  		rmcssql.ActionsDropDown();
+			  		driver.findElement(By.xpath(".//*[@id='rmc-mssql-remove-action']")).click();
+			  		driver.findElement(By.xpath(".//*[@id='hp-alert-assign-form']/footer/div/button[1]")).click();
+			  		System.out.println("Deleting snapshot : " +snaps.get(i));
+			  		Thread.sleep(1000);
+			  		fly.checkTaskComplete();
+			  		Thread.sleep(3000);
+			  		
+			  	}
+			  	
+		  	}
+		  	
+		}
+		rmcssql.logOut();
+		System.out.println(" \n\n\n\n"+"Exiting test"+strTC_ID);
+		System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n\n");
+		    
+
+	}
+		
+	}
+
+	
+	
+	@Test(priority=3, dataProvider="getData",dataProviderClass=rmcsDataProvider.class)
+	public static void TC_03_Numeric_Policy_maxInstance_Snapshots_Remove_oldest(String strTC_ID, String strExecute, String strUsername, String strPassword,String expectedValue, String jobName, String instanceName,String DBName ) throws InterruptedException, IOException
+	{
+		String oldest=null;
+		extent.startTest(strTC_ID, "Rescan Dialog check");
+		
+		
+		if(strExecute.equalsIgnoreCase("Y")){
+			System.out.println("\n\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			   System.out.println("Running test"+strTC_ID+" \n\n\n\n");
+			
+			RMCSLoginPage rmcs= new RMCSLoginPage(driver);
+			RMCSDashboard rmcsdshbd= rmcs.rmcsvalidlogin(strUsername, strPassword);
+		boolean login=rmcsdshbd.LoginValidation(strUsername, extent);	
+		if(login)
+		{
+			debugLog.info("Logged successfully into Dashboard page");
+			rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+		  	rmcssql.SQLPageLandingValidation(extent);
+		  	WebDriverWait wait= new WebDriverWait(driver, 30);
+		  	wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-actions']/label	")));
+		  	System.out.println("Wait over");
+		  	Thread.sleep(3000);
+		  	rmcssql.selectInstance(instanceName, null,null, true);
+		  	Thread.sleep(2000);
+		  	policyConfig=rmcssql.PolicyConfigPageLanding();
+		  	
+	//		  	WebElement actionButton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	"));
+//		  	actionButton.click();
+//		  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-policy-action']")).click();
+//		  	wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='hp-change-page-container']/section/header/h1/span[1]")));
+		  	Thread.sleep(3000);
+//		   	if(driver.findElement(By.xpath(".//*[@id='rmcs-policy-level']")).getText().equalsIgnoreCase(instanceName))
+//		  	{
+//		  		System.out.println("\nInstance name validation success");
+//		  		
+//		  	}
+//		  	else
+//		  		System.out.println("\nInstance name validation failed");
+		  	
+		  	if(policyConfig.policyLandingPageValidation(instanceName,extent))
+		  	{
+		  		System.out.println("\nInstance name validation success");
+		  		
+		  	}
+		  	else
+		  		System.out.println("\nInstance name validation failed");
+//		  	policyConfig.setExpirationPolicy("3",	 null, extent);
+		  	policyConfig.setNumericPolicyFields(maxInstanceSnaps, null, null, null, null, true, false);
+
+		  	wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Policy update has started"));
+//		  	Thread.sleep(10000);
+		  	flyoutActivity fly= new flyoutActivity(driver);
+		  	fly.openFlyOutPage();
+		  	Thread.sleep(2000);
+		  	fly.checkTaskComplete();
+		  	
+		  	ActivityPage activityPage= new ActivityPage(driver);
+		  	activityPage.ActivityPageLand();
+		  	boolean flag=true;
+		  	if(activityPage.checkTaskCompletion(activityPage.getJobIdbyJobName(jobName)).equalsIgnoreCase("completed"))
+		  	{
+		  		ArrayList<String> snaps = new ArrayList<String>();
+		  		System.out.println("Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO	, "Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO, "Creating "+maxDbSnaps+" snapshots according to policy and checking");
+			  	for(int i=0;i<Integer.valueOf(maxInstanceSnaps);i++)
+			  		{
+			  		Thread.sleep(3000);
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, null,null	, true);
+				  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+				  	Thread.sleep(2000);
+				  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+			  		createSSbutton.click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+			  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+			  		Thread.sleep(2000);
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+//			  		ActivityPage ac= new ActivityPage(driver);
+//			  		System.out.println("\n\n\tShort description is : "+ac.shortDescription(jobId));
+			  		activityPage.ActivityPageLand();
+			  		
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("completed"))
+			  		{
+			  			extent.log(LogStatus.INFO, "Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+			  			System.out.println("Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+			  			String [] x1= activityPage.getShortDescription(jobId).split("\\[");
+			  			String[] x2= x1[1].split("\\]");
+			  			System.out.println(x2[0]);
+//			  			String [] temp1=activityPage.getShortDescription(jobId).split("\\[");
+			  			
+			  			if(i==0)
+			  			{
+			  				
+			  				oldest=x2[0];
+			  				System.out.println("Oldest= "+oldest);
+			  			}
+			  			
+			  				
+			  			{
+			  				snaps.add(i, x2[0]);
+			  			}
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  			flag=false;
+			  			break;
+			  			}
+			  			
+			  		}
+			  	if(flag)
+			  	{
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, null,null	, true);
+				  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+				  	Thread.sleep(2000);
+				  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+			  		createSSbutton.click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+			  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+//			  		ActivityPage ac= new ActivityPage(driver);
+//			  		System.out.println("\n\n\tShort description is : "+ac.shortDescription(jobId));
+			  		activityPage.ActivityPageLand();
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("completed"))
+			  		{
+			  			String [] x1= activityPage.getShortDescription(jobId).split("\\[");
+			  			String[] x2= x1[1].split("\\]");
+			  			System.out.println(x2[0]);
+			  			snaps.set(0, x2[0]);
+			  			System.out.println("Success in deleting and making : "+ activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.INFO, activityPage.getShortDescription(jobId));
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  		}
+			  		rmcsdshbd.RMCSSQLApplicationClick();
+			  		rmcssql.SQLPageLandingValidation(extent);
+			  		rmcssql.selectInstance(instanceName, DBName, null, true);
+			  		try{
+			  			if(driver.findElements(By.xpath(".//*[@id='"+oldest+"']/td[1]")).size()>0)
+			  		
+			  		{
+			  			System.out.println("Failed : Did not delete snap " +oldest);
+			  			extent.log(LogStatus.ERROR, "Failed : Did not delete snap " +oldest);
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Success : Could not find "+ oldest);
+			  			extent.log(LogStatus.INFO, "Success : Could not find "+ oldest);
+			  		}
+			  		}
+			  		catch(Exception e)
+			  		{
+			  			System.out.println("inside catch Success : Could not find "+ oldest);
+			  			extent.log(LogStatus.INFO, "Success : Could not find "+ oldest);
+			  		}
+			  		
+			  			
+			  	}
+			  	
+			  	for(int i=0;i<snaps.size();i++)
+			  	{	
+			  		rmcsdshbd.RMCSSQLApplicationClick();
+			  		rmcssql.SQLPageLandingValidation(extent);
+			  		rmcssql.selectInstance(instanceName, DBName, snaps.get(i), true);
+			  		rmcssql.ActionsDropDown();
+			  		driver.findElement(By.xpath(".//*[@id='rmc-mssql-remove-action']")).click();
+			  		driver.findElement(By.xpath(".//*[@id='hp-alert-assign-form']/footer/div/button[1]")).click();
+			  		System.out.println("Deleting snapshot : " +snaps.get(i));
+			  		Thread.sleep(1000);
+			  		fly.checkTaskComplete();
+			  		Thread.sleep(3000);
+			  		
+			  	}
+			  	
+		  	}
+		  	
+		}
+		rmcssql.logOut();
+		System.out.println(" \n\n\n\n"+"Exiting test"+strTC_ID);
+		System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n\n");
+		   
+	}
+		
+	}
+	
+	@Test(priority=4, dataProvider="getData",dataProviderClass=rmcsDataProvider.class)
+	public static void TC_04_Numeric_Policy_maxDB_Snapshots_Remove_oldest(String strTC_ID, String strExecute, String strUsername, String strPassword,String expectedValue, String jobName, String instanceName,String DBName ) throws InterruptedException, IOException
+	{
+		String oldest=null;
+		extent.startTest(strTC_ID, "Rescan Dialog check");
+		
+	  
+		if(strExecute.equalsIgnoreCase("Y")){
+			System.out.println("\n\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			   System.out.println("Running test"+strTC_ID+" \n\n\n\n");
+			
+			RMCSLoginPage rmcs= new RMCSLoginPage(driver);
+			RMCSDashboard rmcsdshbd= rmcs.rmcsvalidlogin(strUsername, strPassword);
+		boolean login=rmcsdshbd.LoginValidation(strUsername, extent);	
+		if(login)
+		{
+			debugLog.info("Logged successfully into Dashboard page");
+			rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+		  	rmcssql.SQLPageLandingValidation(extent);
+		  	WebDriverWait wait= new WebDriverWait(driver, 30);
+		  	wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-actions']/label	")));
+		  	System.out.println("Wait over");
+		  	Thread.sleep(3000);
+		  	rmcssql.selectInstance(instanceName, DBName,null, false);
+		  	Thread.sleep(2000);
+		  	policyConfig=rmcssql.PolicyConfigPageLanding();
+		  	
+	//		  	WebElement actionButton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	"));
+//		  	actionButton.click();
+//		  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-policy-action']")).click();
+//		  	wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='hp-change-page-container']/section/header/h1/span[1]")));
+		  	Thread.sleep(3000);
+//		   	if(driver.findElement(By.xpath(".//*[@id='rmcs-policy-level']")).getText().equalsIgnoreCase(instanceName))
+//		  	{
+//		  		System.out.println("\nInstance name validation success");
+//		  		
+//		  	}
+//		  	else
+//		  		System.out.println("\nInstance name validation failed");
+		  	
+		  	if(policyConfig.policyLandingPageValidation(instanceName,extent))
+		  	{
+		  		System.out.println("\nInstance name validation success");
+		  		
+		  	}
+		  	else
+		  		System.out.println("\nInstance name validation failed");
+//		  	policyConfig.setExpirationPolicy("3",	 null, extent);
+		  	policyConfig.setNumericPolicyFields(null, maxDbSnaps, null, null, null, true, false);
+//		  	WebElement maxInstanceSS= driver.findElement(By.xpath(".//*[@id='rmcs-max-instance-snaps']"));
+//		  	//Maximum Instance level Snapshots field
+//		  	maxInstanceSS.clear();
+//		  	maxInstanceSS.sendKeys("2");
+//		  	//Maximum DB level Snapshots field
+//		  	WebElement maxDbSS= driver.findElement(By.xpath(".//*[@id='rmcs-max-db-snaps']"));
+//		  	maxDbSS.clear();
+//		  	maxDbSS.sendKeys("3");
+//		  	//OK button on policy config dialog
+//		  	WebElement policyConfigOK= driver.findElement(By.xpath(".//*[@id='rmcs-policy-ok']"));
+//		  	policyConfigOK.click();
+		  	wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Policy update has started"));
+//		  	Thread.sleep(10000);
+		  	flyoutActivity fly= new flyoutActivity(driver);
+		  	fly.openFlyOutPage();
+		  	Thread.sleep(2000);
+		  	fly.checkTaskComplete();
+		  	
+		  	ActivityPage activityPage= new ActivityPage(driver);
+		  	activityPage.ActivityPageLand();
+		  	boolean flag=true;
+		  	if(activityPage.checkTaskCompletion(activityPage.getJobIdbyJobName(jobName)).equalsIgnoreCase("completed"))
+		  	{
+		  		ArrayList<String> snaps = new ArrayList<String>();
+		  		System.out.println("Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO	, "Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO, "Creating "+maxDbSnaps+" snapshots according to policy and checking");
+			  	for(int i=0;i<Integer.valueOf(maxDbSnaps);i++)
+			  		{
+			  		Thread.sleep(3000);
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, DBName,null	, false);
+				  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+				  	Thread.sleep(2000);
+				  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+			  		createSSbutton.click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+			  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+			  		Thread.sleep(2000);
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+//			  		ActivityPage ac= new ActivityPage(driver);
+//			  		System.out.println("\n\n\tShort description is : "+ac.shortDescription(jobId));
+			  		activityPage.ActivityPageLand();
+			  		
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("completed"))
+			  		{
+			  			extent.log(LogStatus.INFO, "Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+			  			System.out.println("Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+			  			String [] x1= activityPage.getShortDescription(jobId).split("\\[");
+			  			String[] x2= x1[1].split("\\]");
+			  			System.out.println(x2[0]);
+//			  			String [] temp1=activityPage.getShortDescription(jobId).split("\\[");
+			  			
+			  			if(i==0)
+			  			{
+			  				
+			  				oldest=x2[0];
+			  				System.out.println("Oldest= "+oldest);
+			  			}
+			  			
+			  				
+			  			{
+			  				snaps.add(i, x2[0]);
+			  			}
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  			flag=false;
+			  			break;
+			  			}
+			  			
+			  		}
+			  	if(flag)
+			  	{
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, DBName	,null	, false);
+				  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+				  	Thread.sleep(2000);
+				  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+			  		createSSbutton.click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+			  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+//			  		ActivityPage ac= new ActivityPage(driver);
+//			  		System.out.println("\n\n\tShort description is : "+ac.shortDescription(jobId));
+			  		activityPage.ActivityPageLand();
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("completed"))
+			  		{
+			  			
+			  			System.out.println("Success : "+ activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.INFO, activityPage.getShortDescription(jobId));
+			  			String [] x1= activityPage.getShortDescription(jobId).split("\\[");
+			  			String[] x2= x1[1].split("\\]");
+			  			System.out.println(x2[0]);
+			  			snaps.set(0, x2[0]);
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  		}
+			  		rmcsdshbd.RMCSSQLApplicationClick();
+			  		rmcssql.SQLPageLandingValidation(extent);
+			  		rmcssql.selectInstance(instanceName, DBName, null, false);
+			  		try{
+			  			if(driver.findElements(By.xpath(".//*[@id='"+oldest+"']/td[1]")).size() > 0)
+			  		
+			  		{
+			  			System.out.println("Failed : Did not delete snap " +oldest);
+			  			extent.log(LogStatus.ERROR, "Failed : Did not delete snap " +oldest);
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Success : Could not find "+ oldest);
+			  			extent.log(LogStatus.INFO, "Success : Could not find "+ oldest);
+			  		}
+			  		}
+			  		catch(NoSuchElementException e)
+			  		{
+			  			System.out.println("Success : Could not find "+ oldest);
+			  			extent.log(LogStatus.INFO, "Success : Could not find "+ oldest);
+			  		}
+			  		
+			  			
+			  	}
+			  	
+			  	for(int i=0;i<snaps.size();i++)
+			  	{	
+			  		rmcsdshbd.RMCSSQLApplicationClick();
+			  		rmcssql.SQLPageLandingValidation(extent);
+			  		rmcssql.selectInstance(instanceName, DBName, snaps.get(i), false);
+			  		rmcssql.ActionsDropDown();
+			  		driver.findElement(By.xpath(".//*[@id='rmc-mssql-remove-action']")).click();
+			  		driver.findElement(By.xpath(".//*[@id='hp-alert-assign-form']/footer/div/button[1]")).click();
+			  		System.out.println("Deleting snapshot : " +snaps.get(i));
+			  		Thread.sleep(1000);
+			  		fly.checkTaskComplete();
+			  		Thread.sleep(3000);
+			  		
+			  	}
+			  	
+		  	}
+		  	
+		}
+		rmcssql.logOut();
+		System.out.println(" \n\n\n\n"+"Exiting test"+strTC_ID);
+		System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n\n");
+		   
+	}
+		
+	}
+ 
+	
+	@Test(priority=5, dataProvider="getData",dataProviderClass=rmcsDataProvider.class)
+	public static void TC_05_Numeric_Policy_maxDB_Snapshots_Remove_oldest_Retention(String strTC_ID, String strExecute, String strUsername, String strPassword,String expectedValue, String jobName, String instanceName,String DBName ) throws InterruptedException, IOException
+	{
+		String oldest=null;
+		extent.startTest(strTC_ID, "Rescan Dialog check");
+		
+	  
+		if(strExecute.equalsIgnoreCase("Y")){
+			System.out.println("\n\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			   System.out.println("Running test"+strTC_ID+" \n\n\n\n");
+			
+			RMCSLoginPage rmcs= new RMCSLoginPage(driver);
+			RMCSDashboard rmcsdshbd= rmcs.rmcsvalidlogin(strUsername, strPassword);
+		boolean login=rmcsdshbd.LoginValidation(strUsername, extent);	
+		if(login)
+		{
+			debugLog.info("Logged successfully into Dashboard page");
+			rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+		  	rmcssql.SQLPageLandingValidation(extent);
+		  	WebDriverWait wait= new WebDriverWait(driver, 30);
+		  	wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-actions']/label	")));
+		  	System.out.println("Wait over");
+		  	Thread.sleep(3000);
+		  	rmcssql.selectInstance(instanceName, DBName,null, false);
+		  	Thread.sleep(2000);
+		  	policyConfig=rmcssql.PolicyConfigPageLanding();
+		  	
+	//		  	WebElement actionButton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	"));
+//		  	actionButton.click();
+//		  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-policy-action']")).click();
+//		  	wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='hp-change-page-container']/section/header/h1/span[1]")));
+		  	Thread.sleep(3000);
+//		   	if(driver.findElement(By.xpath(".//*[@id='rmcs-policy-level']")).getText().equalsIgnoreCase(instanceName))
+//		  	{
+//		  		System.out.println("\nInstance name validation success");
+//		  		
+//		  	}
+//		  	else
+//		  		System.out.println("\nInstance name validation failed");
+		  	
+		  	if(policyConfig.policyLandingPageValidation(instanceName,extent))
+		  	{
+		  		System.out.println("\nInstance name validation success");
+		  		
+		  	}
+		  	else
+		  		System.out.println("\nInstance name validation failed");
+//		  	policyConfig.setExpirationPolicy("3",	 null, extent);
+		  	policyConfig.setNumericPolicyFields(null, maxDbSnaps, null, null, "1", true, false);
+//		  	WebElement maxInstanceSS= driver.findElement(By.xpath(".//*[@id='rmcs-max-instance-snaps']"));
+//		  	//Maximum Instance level Snapshots field
+//		  	maxInstanceSS.clear();
+//		  	maxInstanceSS.sendKeys("2");
+//		  	//Maximum DB level Snapshots field
+//		  	WebElement maxDbSS= driver.findElement(By.xpath(".//*[@id='rmcs-max-db-snaps']"));
+//		  	maxDbSS.clear();
+//		  	maxDbSS.sendKeys("3");
+//		  	//OK button on policy config dialog
+//		  	WebElement policyConfigOK= driver.findElement(By.xpath(".//*[@id='rmcs-policy-ok']"));
+//		  	policyConfigOK.click();
+		  	wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Policy update has started"));
+		  	Thread.sleep(1000);
+		  	flyoutActivity fly= new flyoutActivity(driver);
+		  	fly.openFlyOutPage();
+		  	Thread.sleep(2000);
+		  	fly.checkTaskComplete();
+		  	
+		  	ActivityPage activityPage= new ActivityPage(driver);
+		  	activityPage.ActivityPageLand();
+		  	boolean flag=true;
+		  	if(activityPage.checkTaskCompletion(activityPage.getJobIdbyJobName(jobName)).equalsIgnoreCase("completed"))
+		  	{
+		  		ArrayList<String> snaps = new ArrayList<String>();
+		  		System.out.println("Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO	, "Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO, "Creating "+maxDbSnaps+" snapshots according to policy and checking");
+			  	for(int i=0;i<Integer.valueOf(maxDbSnaps);i++)
+			  		{
+			  		Thread.sleep(3000);
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, DBName,null	, false);
+//				  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+//				  	Thread.sleep(2000);
+//				  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+//			  		createSSbutton.click();
+//			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+//			  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+//			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+				  	createSS(driver);
+			  		Thread.sleep(2000);
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+//			  		ActivityPage ac= new ActivityPage(driver);
+//			  		System.out.println("\n\n\tShort description is : "+ac.shortDescription(jobId));
+			  		activityPage.ActivityPageLand();
+			  		
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("completed"))
+			  		{
+			  			extent.log(LogStatus.INFO, "Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+			  			System.out.println("Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+			  			String [] x1= activityPage.getShortDescription(jobId).split("\\[");
+			  			String[] x2= x1[1].split("\\]");
+			  			System.out.println(x2[0]);
+//			  			String [] temp1=activityPage.getShortDescription(jobId).split("\\[");
+			  			
+			  			if(i==0)
+			  			{
+			  				
+			  				oldest=x2[0];
+			  				System.out.println("Oldest= "+oldest);
+			  			}
+			  			
+			  				
+			  			{
+			  				snaps.add(i, x2[0]);
+			  			}
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  			flag=false;
+			  			break;
+			  			}
+			  			
+			  		}
+			  	if(flag)
+			  	{
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, DBName	,null	, false);
+				  	createSS(driver);
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+//			  		ActivityPage ac= new ActivityPage(driver);
+//			  		System.out.println("\n\n\tShort description is : "+ac.shortDescription(jobId));
+			  		activityPage.ActivityPageLand();
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("Error"))
+			  		{
+			  			
+			  			System.out.println("Success : "+ activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.INFO, activityPage.getShortDescription(jobId));
+			  			
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  			String [] x1= activityPage.getShortDescription(jobId).split("\\[");
+			  			String[] x2= x1[1].split("\\]");
+			  			System.out.println(x2[0]);
+			  			snaps.set(0, x2[0]);
+			  		}
+			  		rmcsdshbd.RMCSSQLApplicationClick();
+			  		rmcssql.SQLPageLandingValidation(extent);
+			  		rmcssql.selectInstance(instanceName, DBName, null, false);
+			  		try{
+			  			if(driver.findElements(By.xpath(".//*[@id='"+oldest+"']/td[1]")).size() > 0)
+			  		
+			  		{
+			  			System.out.println("Success : Did not delete snap " +oldest);
+			  			extent.log(LogStatus.ERROR, "Failed : Did not delete snap " +oldest);
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failure : Could not find "+ oldest);
+			  			extent.log(LogStatus.INFO, "Success : Could not find "+ oldest);
+			  		}
+			  		}
+			  		catch(NoSuchElementException e)
+			  		{
+			  			System.out.println("Success : Could not find "+ oldest);
+			  			extent.log(LogStatus.INFO, "Success : Could not find "+ oldest);
+			  		}
+			  		
+			  			
+			  	}
+			  	
+			  	for(int i=0;i<snaps.size();i++)
+			  	{	
+			  		rmcsdshbd.RMCSSQLApplicationClick();
+			  		rmcssql.SQLPageLandingValidation(extent);
+			  		rmcssql.selectInstance(instanceName, DBName, snaps.get(i), false);
+			  		rmcssql.ActionsDropDown();
+			  		driver.findElement(By.xpath(".//*[@id='rmc-mssql-remove-action']")).click();
+			  		driver.findElement(By.xpath(".//*[@id='hp-alert-assign-form']/footer/div/button[1]")).click();
+			  		System.out.println("Deleting snapshot : " +snaps.get(i));
+			  		Thread.sleep(1000);
+			  		fly.checkTaskComplete();
+			  		Thread.sleep(3000);
+			  		
+			  	}
+			  	
+		  	}
+		  	
+		}
+		rmcssql.logOut();
+		System.out.println(" \n\n\n\n"+"Exiting test"+strTC_ID);
+		System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n\n");
+		   
+	}
+		
+	}
+	
+	
+	@Test(priority=6, dataProvider="getData",dataProviderClass=rmcsDataProvider.class)
+	public static void TC_06_Expiration_Policy_No_Retention(String strTC_ID, String strExecute, String strUsername, String strPassword,String expectedValue, String jobName, String instanceName,String DBName ) throws InterruptedException, IOException
+	{
+		String oldest=null;
+		extent.startTest(strTC_ID, "Rescan Dialog check");
+		
+	  
+		if(strExecute.equalsIgnoreCase("Y")){
+			System.out.println("\n\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			   System.out.println("Running test"+strTC_ID+" \n\n\n\n");
+			
+			RMCSLoginPage rmcs= new RMCSLoginPage(driver);
+			RMCSDashboard rmcsdshbd= rmcs.rmcsvalidlogin(strUsername, strPassword);
+		boolean login=rmcsdshbd.LoginValidation(strUsername, extent);	
+		if(login)
+		{
+			debugLog.info("Logged successfully into Dashboard page");
+			rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+		  	rmcssql.SQLPageLandingValidation(extent);
+		  	WebDriverWait wait= new WebDriverWait(driver, 30);
+		  	wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-actions']/label	")));
+		  	System.out.println("Wait over");
+		  	Thread.sleep(3000);
+		  	rmcssql.selectInstance(instanceName, DBName,null, false);
+		  	Thread.sleep(2000);
+		  	policyConfig=rmcssql.PolicyConfigPageLanding();
+		  	
+	//		  	WebElement actionButton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	"));
+//		  	actionButton.click();
+//		  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-policy-action']")).click();
+//		  	wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='hp-change-page-container']/section/header/h1/span[1]")));
+		  	Thread.sleep(3000);
+//		   	if(driver.findElement(By.xpath(".//*[@id='rmcs-policy-level']")).getText().equalsIgnoreCase(instanceName))
+//		  	{
+//		  		System.out.println("\nInstance name validation success");
+//		  		
+//		  	}
+//		  	else
+//		  		System.out.println("\nInstance name validation failed");
+		  	
+		  	if(policyConfig.policyLandingPageValidation(instanceName,extent))
+		  	{
+		  		System.out.println("\nInstance name validation success");
+		  		
+		  	}
+		  	else
+		  		System.out.println("\nInstance name validation failed");
+		  	policyConfig.setExpirationPolicy("1",	 "0", false, extent);
+//		  	policyConfig.setNumericPolicyFields(null, maxDbSnaps, null, null, "1", true, false);
+//		  	WebElement maxInstanceSS= driver.findElement(By.xpath(".//*[@id='rmcs-max-instance-snaps']"));
+//		  	//Maximum Instance level Snapshots field
+//		  	maxInstanceSS.clear();
+//		  	maxInstanceSS.sendKeys("2");
+//		  	//Maximum DB level Snapshots field
+//		  	WebElement maxDbSS= driver.findElement(By.xpath(".//*[@id='rmcs-max-db-snaps']"));
+//		  	maxDbSS.clear();
+//		  	maxDbSS.sendKeys("3");
+//		  	//OK button on policy config dialog
+//		  	WebElement policyConfigOK= driver.findElement(By.xpath(".//*[@id='rmcs-policy-ok']"));
+//		  	policyConfigOK.click();
+		  	wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Policy update has started"));
+		  	Thread.sleep(1000);
+		  	flyoutActivity fly= new flyoutActivity(driver);
+		  	fly.openFlyOutPage();
+		  	Thread.sleep(2000);
+		  	fly.checkTaskComplete();
+		  	
+		  	ActivityPage activityPage= new ActivityPage(driver);
+		  	activityPage.ActivityPageLand();
+		  	boolean flag=true;
+		  	if(activityPage.checkTaskCompletion(activityPage.getJobIdbyJobName(jobName)).equalsIgnoreCase("completed"))
+		  	{
+		  		ArrayList<String> snaps = new ArrayList<String>();
+		  		System.out.println("Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO	, "Policy configuration succesful, task state is : Completed");
+		  		extent.log(LogStatus.INFO, "Creating "+maxDbSnaps+" snapshots according to policy and checking");
+//			  	for(int i=0;i<Integer.valueOf(maxDbSnaps);i++)
+			  		{
+			  		Thread.sleep(3000);
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, DBName,null	, false);
+//				  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+//				  	Thread.sleep(2000);
+//				  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+//			  		createSSbutton.click();
+//			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+//			  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+//			  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+				  	createSS(driver);
+			  		Thread.sleep(2000);
+			  		String jobId=fly.getJobId();
+			  		fly.checkTaskComplete();
+//			  		ActivityPage ac= new ActivityPage(driver);
+//			  		System.out.println("\n\n\tShort description is : "+ac.shortDescription(jobId));
+			  		activityPage.ActivityPageLand();
+			  		
+			  		
+			  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("completed"))
+			  		{
+//			  			extent.log(LogStatus.INFO, "Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+//			  			System.out.println("Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+			  			String [] x1= activityPage.getShortDescription(jobId).split("\\[");
+			  			String[] x2= x1[1].split("\\]");
+			  			System.out.println(x2[0]);
+			  			oldest=x2[0];
+//			  			String [] temp1=activityPage.getShortDescription(jobId).split("\\[");
+			  			
+//			  			if(i==0)
+//			  			{
+//			  				
+//			  				oldest=x2[0];
+//			  				System.out.println("Oldest= "+oldest);
+//			  			}
+//			  			
+//			  				
+//			  			{
+//			  				snaps.add(i, x2[0]);
+//			  			}
+			  		}
+			  		else
+			  		{
+			  			System.out.println("Failed : "+activityPage.getShortDescription(jobId));
+			  			extent.log(LogStatus.ERROR, activityPage.getShortDescription(jobId));
+			  			flag=false;
+//			  			break;
+			  			}
+			  			
+			  		}
+			  	if(flag)
+			  	{
+			  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+				  	rmcssql.SQLPageLandingValidation(extent);
+				  	Thread.sleep(3000);
+				  	rmcssql.selectInstance(instanceName, DBName	,null	, false);
+				  	String returnValue=policyConfig.checkExpirationPolicyConfiguration(oldest, true, false	, extent);
+				  	if(returnValue.equalsIgnoreCase("Expiration set"))
+				  	{
+				  		System.out.println("Expiration policy succesful : " + returnValue);
+				  		extent.log(LogStatus.INFO, "Expiration policy succesful : " + returnValue);
+				  	}
+				  	else
+				  	{
+				  		System.out.println("Expiration policy failed : " + returnValue);
+				  		extent.log(LogStatus.ERROR, "Expiration policy failed : " + returnValue);
+				  	}
+//				
+//			  		
+			  	}
+			  	
+		  	}
+		  	
+		}
+		rmcssql.logOut();
+		System.out.println(" \n\n\n\n"+"Exiting test"+strTC_ID);
+		System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n\n");
+		   
+	}
+		
+	}
+	
+	
+	@Test(priority=6, dataProvider="getData",dataProviderClass=rmcsDataProvider.class)
+	public static void TC_07_Modify_Retention(String strTC_ID, String strExecute, String strUsername, String strPassword,String expectedValue, String jobName, String instanceName,String DBName ) throws InterruptedException, IOException
+	{
+		String oldest=null;
+		extent.startTest(strTC_ID, "Rescan Dialog check");
+		
+	  
+		if(strExecute.equalsIgnoreCase("Y")){
+			System.out.println("\n\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			   System.out.println("Running test "+strTC_ID+" \n\n\n\n");
+			
+			RMCSLoginPage rmcs= new RMCSLoginPage(driver);
+			RMCSDashboard rmcsdshbd= rmcs.rmcsvalidlogin(strUsername, strPassword);
+		boolean login=rmcsdshbd.LoginValidation(strUsername, extent);	
+		if(login)
+		{
+			debugLog.info("Logged successfully into Dashboard page");
+			rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+		  	rmcssql.SQLPageLandingValidation(extent);
+		  	WebDriverWait wait= new WebDriverWait(driver, 30);
+		  	wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-actions']/label	")));
+		  	System.out.println("Wait over");
+		  	Thread.sleep(3000);
+		  	rmcssql.selectInstance(instanceName, DBName,null, false);
+		  	Thread.sleep(2000);
+		  	
+		  	createSS(driver);
+	  		Thread.sleep(2000);
+	  		flyoutActivity fly=new flyoutActivity(driver);
+	  		fly.openFlyOutPage();
+	  		String jobId=fly.getJobId();
+	  		fly.checkTaskComplete();
+	  		ActivityPage activityPage= new ActivityPage(driver);
+//	  		System.out.println("\n\n\tShort description is : "+ac.shortDescription(jobId));
+	  		activityPage.ActivityPageLand();
+	  		
+	  		
+	  		if(activityPage.checkTaskCompletion(jobId).equalsIgnoreCase("completed"))
+	  		{
+//	  			extent.log(LogStatus.INFO, "Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+//	  			System.out.println("Passed iteration : " + (i+1) +" "+activityPage.getShortDescription(jobId));
+	  			String [] x1= activityPage.getShortDescription(jobId).split("\\[");
+	  			String[] x2= x1[1].split("\\]");
+	  			System.out.println(x2[0]);
+	  			oldest=x2[0];
+	  		}
+	  		
+	  		rmcssql = rmcsdshbd.RMCSSQLApplicationClick();
+		  	rmcssql.SQLPageLandingValidation(extent);
+		  	wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-mssql-actions']/label	")));
+		  	System.out.println("Wait over");
+		  	Thread.sleep(3000);
+		  	rmcssql.selectInstance(instanceName, DBName,oldest, false);
+		  	Thread.sleep(2000);
+		  	rmcssql.selectInstance(instanceName, DBName,oldest, false);
+		  	editSS(driver);
+		  	RMCSPolicyConfig policyConfig= new RMCSPolicyConfig(driver);
+		  	policyConfig.setExpirationPolicy("1", "1", true, extent);
+		  	jobId=fly.getJobId();
+		  	fly.checkTaskComplete();
+		  	
+		  	System.out.println("Job id= " + jobId);
+		  	ActivityPage ac= new ActivityPage(driver);
+		  	ac.ActivityPageLand();
+		  	if(ac.checkTaskCompletion(jobId).equalsIgnoreCase("completed"))
+		  	{
+		  		System.out.println("Success"+ ac.getShortDescription(jobId));
+		  	}
+		  	else
+		  	{
+		  		System.out.println("Failure"+ac.getShortDescription(jobId));
+		  	}
+//		  	policyConfig= rmcssql.PolicyConfigPageLanding();
+		  	
+		}
+		rmcssql.logOut();
+		System.out.println(" \n\n\n\n"+"Exiting test"+strTC_ID);
+		System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n\n");
+		}
+	}
+	
+	
+	
+	
+	
+	public static void createSS(WebDriver driver) throws InterruptedException
+
+	{
+		WebDriverWait wait= new WebDriverWait(driver, 60);
+		driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+	  	Thread.sleep(2000);
+	  	WebElement createSSbutton=	driver.findElement(By.xpath(".//*[@id='rmc-mssql-create-snapshot-action']"));//.click();
+  		createSSbutton.click();
+  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Done. Gathered the required information	"));
+  		driver.findElement(By.xpath(".//*[@id='rmcs-snapshot-aag-replicas']/fieldset/ol/li/div/div/div/div")).click();
+  		driver.findElement(By.xpath(".//*[@id='rmcs-snapshot-aag-replicas']/fieldset/ol/li/div/div/div/ol/li[2]")).click();
+//  		
+  		driver.findElement(By.xpath(".//*[@id='rmcs-create-snapshot-ok']	")).click();
+  		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.cssSelector(".hp-form-message"),"Creating Snapshot..."));
+  		
+  		
+		
+		
+	}
+	
+	public static void editSS(WebDriver driver) throws InterruptedException
+	{
+		WebDriverWait wait= new WebDriverWait(driver, 60);
+		driver.findElement(By.xpath(".//*[@id='rmc-mssql-actions']/label	")).click();
+	  	Thread.sleep(2000);
+	  	driver.findElement(By.xpath(".//*[@id='rmc-mssql-edit-snapshot-action']")).click();
+	  	
+	}
+
+}
+

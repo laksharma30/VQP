@@ -1,0 +1,74 @@
+package objectRepositoryAndFunctionalLibrary;
+
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class flyoutActivity {
+	
+	@FindBy(xpath=".//*[@id='hp-flyout-activities']/li/div[1]/div/span[@class='hp-value']")
+	List<WebElement> ActivityList;
+
+	@FindBy(xpath=".//*[@id='hp-flyout-activities']/li")
+	List<WebElement> ActivityList1;
+	
+	@FindBy(xpath=".//*[@id='hp-activity-control']/div[1]")
+	WebElement flyOutButton;
+	WebDriver driver;
+	
+	//WebDriverWait wait;
+//	 List<WebElement> ActivityList=driver.findElements(By.xpath(".//*[@id='hp-flyout-activities']/li/div[1]/div/span[@class='hp-value']"));
+//	 List<WebElement> ActivityList1=driver.findElements(By.xpath(".//*[@id='hp-flyout-activities']/li"));
+			
+//		WebElement Status; 
+		public flyoutActivity(WebDriver driver) {
+			this.driver=driver;
+		//	wait = new WebDriverWait(driver,60);
+			PageFactory.initElements(driver, this);
+			
+//		flyOutButton.click();
+
+		}
+		
+	
+	public String getJobId()
+	{
+
+		  	String jobId = null;
+			int itr=0;
+			for (WebElement Act : ActivityList)
+			{
+				String status = Act.getAttribute("innerHTML");
+
+				
+				if (status.equalsIgnoreCase("changing"))
+				{
+//					Status =Act;
+					String datauri = ActivityList1.get(itr).getAttribute("data-uri");
+					String getTaskID[] = datauri.split("/");
+					jobId = getTaskID[getTaskID.length - 1].toString();
+//					System.out.println(Status.getText());
+					break;
+				}
+				itr = itr + 1;
+			}
+			return jobId;
+
+}
+	
+	public void checkTaskComplete() throws InterruptedException
+	{
+
+		WebDriverWait wait1= new WebDriverWait(driver, 3600);
+		wait1.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".hp-status.hp-status-changing")));
+		flyOutButton.click();
+		return;	
+	}
+	
+}

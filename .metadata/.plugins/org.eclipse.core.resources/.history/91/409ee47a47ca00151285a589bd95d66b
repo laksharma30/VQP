@@ -1,0 +1,277 @@
+package objectRepositoryAndFunctionalLibrary;
+
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class ActivityPage {
+	
+	WebDriver driver;
+	WebDriverWait wait;
+	String snapID="";
+	@FindBy(xpath=".//*[@id='hp-activities']/tbody/tr/td[3]")
+	public List<WebElement> ActivityID;
+	
+	@FindBy(xpath=".//*[@id='hp-activities']/tbody/tr/td[4]")
+	public List<WebElement> ActivityName;
+	
+	@FindBy(xpath=".//*[@id='hp-activities']/tbody/tr/td[5]")
+	public List<WebElement> ActivityDesc;
+	
+	@FindBy(xpath=".//*[@id='hp-activities']/tbody/tr/td[6]")
+	public List<WebElement> ActivityState;
+	
+	@FindBy(xpath=".//*[@id='hp-activities']/tbody/tr/td[1]/div")
+	public List<WebElement> ExpandActivityButton;
+	
+	@FindBy(xpath=".//*[@id='hp-main-menu-label']")
+	public WebElement mainMenuLabel;
+	
+	@FindBy(xpath=".//*[@id='hp-main-menu']/div[2]/ul/li[1]/ul/li[2]/a")
+	public WebElement activityLink;
+	
+	@FindBy(xpath=".//*[@id='rmc-taskprogress']/label")
+	public WebElement taskProgressLabel;
+	
+	@FindBy(xpath=".//*[@id='rmc-taskprogress']")
+	public WebElement taskProgressField;
+	
+	public ActivityPage(WebDriver driver) {
+		
+		wait = new WebDriverWait(driver,60);
+		PageFactory.initElements(driver, this);
+//		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-jobstatus-show-overview']")));
+//		List<WebElement> AllJobs;
+//		AllJobs = driver.findElements(By.xpath(".//*[@id='hp-activities']/tbody/tr"));
+		
+		//Adding command to land to activity page in constructor
+		
+		
+		
+		
+//		this.driver=driver;
+		
+	}
+	
+	
+	public void ActivityPageLand() throws InterruptedException
+	{
+		mainMenuLabel.click(); //.//*[@id='hp-main-menu']/div[2]/ul/li[1]/ul/li[2]/a
+		activityLink.click();
+		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-activities']/tbody/tr/td"),"Loading activity ..."));
+		Thread.sleep(3000);
+		return;
+	}
+	
+	
+
+	public String getSnapshotID(String taskid)
+	{
+		
+		int itr=0;
+		for (WebElement job : ActivityID)
+		{
+			
+			if (taskid.equalsIgnoreCase(job.getText()))
+			{
+				System.out.println(job.getText());
+		try
+		{
+			wait.until(ExpectedConditions.textToBePresentInElement(ActivityDesc.get(itr), "successfully")); 
+		
+		
+				String snapText = ActivityDesc.get(itr).getText();
+				String getSnapID[] = snapText.split(" ");
+				snapID = getSnapID[1];
+			
+		}
+		
+		catch (TimeoutException e)
+		{
+			snapID="";
+		}
+			
+			break;	
+		
+				
+				
+			}
+			itr = itr + 1; 
+		}
+		
+		System.out.println(snapID);
+		return snapID;
+	}
+	
+	public String getRemoteSnapshotID(String taskid)
+	{
+		
+		int itr=0;
+		for (WebElement job : ActivityID)
+		{
+			
+			if (taskid.equalsIgnoreCase(job.getText()))
+			{
+				System.out.println(job.getText());
+				try
+				{
+				wait.until(ExpectedConditions.textToBePresentInElement(ActivityDesc.get(itr), "successfully")); 
+				String snapText = ActivityDesc.get(itr).getText();
+				String getSnapID[] = snapText.split(" ");
+				snapID = getSnapID[4];
+				}
+				catch(TimeoutException e)
+				{
+					snapID = "";
+				}
+				break;
+			}
+			itr = itr + 1; 
+		}
+		
+		System.out.println(snapID);
+		return snapID;
+	}
+	
+	public String checkTaskCompletion(String jobId)
+	{
+		int index=0;
+		for(WebElement temp: ActivityID)
+		{
+			if(temp.getText().equalsIgnoreCase(jobId))
+			{
+				break;
+			}
+			index++;
+		}
+		
+		for(int i=0;i<10;i++)
+//		FluentWait wait= new FluentWait(driver).withTimeout(60, TimeUnit.SECONDS).pollingEvery(5, TimeUnit.SECONDS);
+//		wait.until(
+		{
+			if(ActivityState.get(index).getText().contains("Completed"))
+			{
+				System.out.println("Found completed");
+				return "Completed";
+			}
+				
+			else if(ActivityState.get(index).getText().contains("Error"))
+				{
+					System.out.println("Task Error");
+					return "Error";
+					
+				}
+				else
+				driver.navigate().refresh();
+			try {
+				Thread.sleep(8000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		return "";
+	
+	//	FluentWait wait= new FluentWait(driver).withTimeout(60, TimeUnit.SECONDS).pollingEvery(5, TimeUnit.SECONDS);
+		
+		
+	}
+	
+	public boolean shortDescriptionValidation(String jobId,String expectedValue)
+	{
+		int index=0;
+		for(WebElement temp: ActivityID)
+		{
+			if(temp.getText().equalsIgnoreCase(jobId))
+				break;
+		index++;
+		}
+		
+		System.out.println("Actual Message:"+ ActivityDesc.get(index).getText());
+		if(ActivityDesc.get(index).getText().equals(expectedValue))
+			return true;
+		else
+			return false;
+		
+	}
+	
+	public String shortDescription(String jobId)
+	
+	{
+//		activityPageLanding();
+		
+		System.out.println("In activity page");
+		int index=0;
+		for(WebElement temp: ActivityID)
+		{
+			if(temp.getText().equalsIgnoreCase(jobId))
+				return ActivityDesc.get(index).getText();
+				
+		index++;
+		}
+		return "";
+		
+		
+	}
+	
+	public String getJobIdbyJobName(String jobName)
+	{
+		
+		
+		int index=0;
+		for(WebElement temp: ActivityName)
+		{
+			if(temp.getText().equalsIgnoreCase(jobName))
+				break;
+			index++;
+		}
+		return ActivityID.get(index).getText();
+	}
+	
+	public String getDetailDescription(String jobId)
+	{
+		
+		expandActivityAction(jobId);
+//		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//*[@id='rmc-taskprogress']/label")));
+		wait.until(ExpectedConditions.visibilityOf(taskProgressLabel));
+		taskProgressLabel.click();
+//		String taskProgress=driver.findElement(By.xpath(".//*[@id='rmc-taskprogress']")).getText();
+		taskProgressLabel.click();
+		return taskProgressField.getText(); 
+		
+	}
+	
+	public void expandActivityAction(String jobId)
+	{
+		int index=0;
+		for(WebElement i: ActivityID)
+		{	
+			System.out.println(i.getText());
+			if(i.getText().equalsIgnoreCase(jobId))
+				break;
+			index++;
+		}
+		ExpandActivityButton.get(index).click();
+	}
+	
+	
+//	public void activityPageLanding()
+//	{
+//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='rmc-mssql-page']/nav/div[2]/h1")));
+//		mainMenuLabel.click(); 
+//		activityLink.click();
+//		wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-activities']/tbody/tr/td"),"Loading activity ..."));
+//	}
+}

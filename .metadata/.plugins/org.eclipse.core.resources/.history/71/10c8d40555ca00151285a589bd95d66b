@@ -1,0 +1,317 @@
+package objectRepositoryAndFunctionalLibrary;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import com.relevantcodes.extentreports.ExtentReports;
+import com.relevantcodes.extentreports.LogStatus;
+
+public class RMCSPolicyConfig {
+	//Action button drop down
+	@FindBy(xpath=".//*[@id='rmc-mssql-actions']/label	")
+	WebElement btnAction;
+	//Policy configuration button in actions dropdown
+	@FindBy(xpath=".//*[@id='rmc-mssql-policy-action']")
+	WebElement btnPolicy;
+	//Policy dialog box header
+	@FindBy(xpath=".//*[@id='hp-change-page-container']/section/header/h1/span[1]")
+	WebElement policyPageHeader;
+	
+	//Policy dialog box header, policy level
+	@FindBy(xpath=".//*[@id='rmcs-policy-level']")
+	WebElement policyLevelHeader;
+	
+	//Max instance level snaps text field
+	@FindBy(xpath=".//*[@id='rmcs-max-instance-snaps']")
+	WebElement txtMaxInstanceSnaps;
+	
+	//Max DB level snaps text field 
+	@FindBy(xpath=".//*[@id='rmcs-max-db-snaps']")
+	WebElement txtMaxDBSnaps;
+	
+	//Max instance protects text field
+	@FindBy(xpath=".//*[@id='rmcs-max-instance-expprotect']")
+	WebElement txtMaxInstanceProtect;
+	
+	//Max DB protects text field
+	@FindBy(xpath=".//*[@id='rmcs-max-db-expprotect']")
+	WebElement txtMaxDBProtect;
+	
+	//Policy type toggle
+	@FindBy(xpath=".//*[@id='rmcs-policy-type-hpToggle']/ol/li[2]")
+	WebElement btnPolicyType;
+	
+	//Remove oldest snap check box
+	@FindBy(xpath=".//*[@id='rmcs-remove-oldest-snaps']")
+	WebElement chkRemoveOldestSnap;
+	
+	//Remove oldest protect check box
+	@FindBy(xpath=".//*[@id='rmcs-remove-oldest-expprotect']")
+	WebElement chkRemoveOldestProtect;
+	
+	//Retention time text field
+	@FindBy(xpath=".//*[@id='rmcs-policy-retention']")
+	WebElement txtRetentionTime;
+	
+	@FindBy(xpath=".//*[@id='rmcs-snapshot-retention']")
+	WebElement txtRetentionEditSnap;
+	
+	
+	//Retention time units drop down
+	@FindBy(xpath=".//*[@id='rmcs-retention-general']/fieldset/ol/li/div/div[1]/div/div")
+	WebElement dropRetentionTimeToggle;
+	
+	//Policy config dialog OK button
+	@FindBy(xpath=".//*[@id='rmcs-policy-ok']")
+	WebElement btnPolicyOK;
+	
+	@FindBy(xpath=".//*[@id='rmcs-edit-snapshot-ok']")
+	WebElement btnEditSnapOK;
+	
+	//Policy config dialog Cancel button
+	@FindBy(xpath=".//*[@id='rmcs-policy-cancel']")
+	WebElement btnPolicyCancel;
+	
+	//Policy config dialog form message
+	@FindBy(xpath=".//*[@id='hp-form-message']")
+	WebElement formMessage;
+
+	//Expiration time text field
+	@FindBy(xpath=".//*[@id='rmcs-policy-expiration']")
+	WebElement txtExpirationTime;
+	
+	@FindBy(xpath=".//*[@id='rmcs-snapshot-expiration']")
+	WebElement txtExpirationEditSnap;
+	
+	WebDriver driver;
+	WebDriverWait wait;
+	WebElement wait1;
+	//Constructor initializes elements and brings to policy page
+	public RMCSPolicyConfig(WebDriver driver)
+	{
+		this.driver=driver;
+		wait= new WebDriverWait(driver, 60);
+		PageFactory.initElements(driver, this);
+//		btnAction.click();
+//		btnPolicy.click();
+	}
+	//Policy landing page validation, checks for the policy page header and policy level
+	public boolean policyLandingPageValidation(String policyLevel, ExtentReports extent)
+	{
+		wait.until(ExpectedConditions.visibilityOf(policyPageHeader));
+		if(policyPageHeader.getText().equalsIgnoreCase("policy configuration"))
+		{
+			extent.log(LogStatus.INFO, "Inside policy configuration page");
+		}
+		else
+			
+			{
+			extent.log(LogStatus.ERROR, "Not inside policy configuration page, landing page validation failed");
+			return false;
+			}
+		if(this.policyLevelHeader.getText().equalsIgnoreCase(policyLevel))
+		{
+			extent.log(LogStatus.INFO, "Policy level is correct, landing page validation succesful");
+			return true;
+		}
+		else
+			{
+			extent.log(LogStatus.ERROR, "Policy level incorrect, landing page validation failed");
+			return false;
+			}
+	}
+	//Method to set numeric policy
+	public boolean setNumericPolicyFields(String maxInstanceSS,String maxDBSS, String maxInstancePro, String maxDBPro, String retentionTime, boolean removeOldestSnap, boolean removeOldestProtect) throws InterruptedException
+	{
+		if(maxInstanceSS!=null)
+		{
+			txtMaxInstanceSnaps.clear();
+			Thread.sleep(2000);
+			txtMaxInstanceSnaps.sendKeys(maxInstanceSS);
+			Thread.sleep(2000);
+		}
+		if(maxDBSS!=null)
+		{
+			txtMaxDBSnaps.clear();
+			Thread.sleep(2000);
+			txtMaxDBSnaps.sendKeys(maxDBSS);
+			Thread.sleep(2000);
+		}	
+		
+		if(maxInstancePro!=null)
+		{
+			txtMaxInstanceProtect.clear();
+			Thread.sleep(2000);
+			txtMaxInstanceProtect.sendKeys(maxInstancePro);
+			Thread.sleep(2000);
+		}
+		
+		if(maxDBPro!=null)
+		{
+			txtMaxDBProtect.clear();
+			Thread.sleep(2000);
+			txtMaxDBProtect.sendKeys(maxDBPro);
+			Thread.sleep(2000);
+		}	
+		
+		Thread.sleep(1000);
+		if(removeOldestSnap)
+			
+		{
+			System.out.println("Value is "+chkRemoveOldestSnap.getAttribute("value"));
+			if(chkRemoveOldestSnap.getAttribute("value").equalsIgnoreCase("false"))
+			chkRemoveOldestSnap.click();
+			System.out.println("Checked remove oldest");
+			
+		}
+		else
+		{
+			System.out.println("Value is "+chkRemoveOldestSnap.getAttribute("value"));
+			if(chkRemoveOldestSnap.getAttribute("value").equals("true"))
+				chkRemoveOldestSnap.click();
+		}
+		if(removeOldestProtect)
+			chkRemoveOldestProtect.click();
+		
+		if(retentionTime!=null)
+		{
+			this.txtRetentionTime.clear();
+			Thread.sleep(2000);
+			this.txtRetentionTime.sendKeys(retentionTime);
+			Thread.sleep(2000);
+		}
+		Thread.sleep(3000);
+		
+		
+		btnPolicyOK.click();
+		
+		flyoutActivity fly=new flyoutActivity(driver);
+		fly.checkTaskComplete();
+		ActivityPage ac= new ActivityPage(driver);
+		ac.ActivityPageLand();
+		if(ac.checkTaskCompletion(ac.getJobIdbyJobName("Set policy for Snapshot")).equalsIgnoreCase("completed"))
+			return true;
+		else
+			return false;
+}
+	
+	//Method to set expiration policy
+	public boolean setExpirationPolicy(String expirationTime, String retentionTime, Boolean editSnapshot, ExtentReports extent) throws InterruptedException
+	{	
+		if(!editSnapshot)
+			if(driver.findElements(By.xpath(".//*[@id='rmcs-expiration-general']/label")).size()==0)
+			btnPolicyType.click();
+			Thread.sleep(2000);
+			if(retentionTime!=null)
+			{
+				if(Integer.valueOf(expirationTime)<Integer.valueOf(retentionTime))
+				{
+					extent.log(LogStatus.ERROR, "Expiration time must be greater than or equal to retention time");
+					return false;
+				}
+				else
+				{	
+					if(!editSnapshot)
+					{
+						this.txtRetentionTime.clear();
+						this.txtRetentionTime.sendKeys(retentionTime);
+					}
+					else
+					{
+						txtRetentionEditSnap.clear();
+						txtRetentionEditSnap.sendKeys(retentionTime);
+					}
+				}
+			}
+			
+			{
+			if(!editSnapshot)
+			{
+				txtExpirationTime.clear();
+			
+				txtExpirationTime.sendKeys(expirationTime);
+			}
+			
+			else
+			{
+				txtExpirationEditSnap.clear();
+				txtExpirationEditSnap.sendKeys(expirationTime);
+			}
+			extent.log(LogStatus.INFO, "Succesfully set time fields");
+			Thread.sleep(1000);
+			if(!editSnapshot)
+				btnPolicyOK.click();
+			else
+				btnEditSnapOK.click();
+				
+			}
+			
+			
+//			wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath(".//*[@id='hp-form-message']"), "Policy update has started"));
+//			flyoutActivity fly=new flyoutActivity(driver);
+//			fly.checkTaskComplete();
+		ActivityPage ac= new ActivityPage(driver);
+		ac.ActivityPageLand();
+		if(ac.checkTaskCompletion(ac.getJobIdbyJobName("Set policy for Snapshot")).equalsIgnoreCase("completed"))
+			return true;
+		else
+			return false;
+		
+		
+	}
+	
+	//Checks if expiration and retention time are set
+	//If only expiration time is set, returns string "Expiration set"
+	//If only retention time is set, returns string "Retention set"
+	//If both set returns, "Expiration set:Retention set"
+	//Else returns null
+	
+	public String checkExpirationPolicyConfiguration(String SSTimeStamp, boolean expirationTime ,boolean retentionTime,ExtentReports extent)
+	{
+//		String str="Expiration set";
+		if(expirationTime && retentionTime)
+		{
+			if(driver.findElement(By.xpath(".//*[@id='"+SSTimeStamp+"']/td[4]")).getText()!="0")
+				if(driver.findElement(By.xpath(".//*[@id='"+SSTimeStamp+"']/td[3]")).getText()!="0")
+				{
+					extent.log(LogStatus.INFO, "Expiration and Retention time validated");
+					return "Expiration set:Retention set";
+				}
+			extent.log(LogStatus.ERROR	, "Expiration and Retention time validation failed");
+			return null;
+		}
+		if(retentionTime && !expirationTime)
+		{
+			//Dynamic xpath with snapshot timestamp, represents the Retention time field for the snapshot with given timestamp
+			if(driver.findElement(By.xpath(".//*[@id='"+SSTimeStamp+"']/td[4]")).getText()!="0")
+				{
+				extent.log(LogStatus.INFO, "Retention time validated");
+				return "Retention set";
+				}
+			else
+			{
+				extent.log(LogStatus.ERROR	, "Retention time validation failed");
+				return null;
+			}
+		}
+		
+		//Dynamic xpath with snapshot timestamp, represents the Expiration time field for the snapshot with given timestamp
+		if(driver.findElement(By.xpath(".//*[@id='"+SSTimeStamp+"']/td[3]")).getText()!="0")
+			{
+			extent.log(LogStatus.INFO, "Expiration time validated");
+			return "Expiration set";
+			}
+		else
+			{
+			extent.log(LogStatus.ERROR, "Expiration policy validation failed");
+			return null;
+			}
+	}
+	
+	
+}

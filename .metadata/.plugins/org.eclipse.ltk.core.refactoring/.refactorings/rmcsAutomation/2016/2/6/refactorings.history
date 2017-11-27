@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete 3 elements from project &apos;rmcsAutomation&apos;&#x0D;&#x0A;- Original project: &apos;rmcsAutomation&apos;&#x0D;&#x0A;- Original elements:&#x0D;&#x0A;     rmcstestsuite.backupPolicies.java&#x0D;&#x0A;     rmcstestsuite.backupSystemAddition.java&#x0D;&#x0A;     rmcstestsuite.sqlServerRegistration.java" description="Delete elements" element1="/src&lt;rmcstestsuite{backupSystemAddition.java" element2="/src&lt;rmcstestsuite{sqlServerRegistration.java" element3="/src&lt;rmcstestsuite{backupPolicies.java" elements="3" flags="589830" id="org.eclipse.jdt.ui.delete" resources="0" stamp="1454483812412" subPackages="false" version="1.0"/>
+</session>
